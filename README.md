@@ -1,3 +1,3 @@
 # Sistema do Agape
 
-Projeto voltado para criar um sistema do movimento agape de jovens PSMA, intuito de começar com uma chamada e ir melhorando para as necessidades!
+Projeto voltado para criar um sistema do movimento **Agape de Jovens da PSMA**, intuito de fazer uma chamada e ir melhorando para as necessidades do movimento!
