@@ -95,6 +95,7 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#2E86DE',
   },
+  
   logoImage: {
     width: 40,
     height: 40,
