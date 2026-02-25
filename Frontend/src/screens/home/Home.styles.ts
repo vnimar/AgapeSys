@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -70,5 +71,33 @@ export const styles = StyleSheet.create({
   },
   time: {
     color: '#888',
+  },
+
+  /* Header */
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  greeting: {
+    fontSize: 20,
+    color: '#1F2A44',
+  },
+
+  username: {
+    fontWeight: 'bold',
+  },
+
+  logo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2E86DE',
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
 });

@@ -1,10 +1,23 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { styles } from './Home.styles.ts';
+import { styles } from './Home.styles.ts'; import { Image } from 'react-native';
 
 const Home: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>
+            Olá, <Text style={styles.username}>Servo !</Text>
+          </Text>
+        </View>
+
+        <Image
+          source={require('../../assets/images/logoAgapeJovensDiscipuladoPSMA.png')}
+          style={styles.logoImage}
+        />
+      </View>
       {/* Card Próxima Missão */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Próxima Missão</Text>
