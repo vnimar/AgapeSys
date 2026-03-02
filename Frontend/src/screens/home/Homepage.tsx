@@ -1,8 +1,37 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { styles } from './Home.styles.ts'; import { Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native';
+import { formatarDataBR, styles } from './Home.styles.ts'; import { Image } from 'react-native';
+import { getProximaMissao } from '../../services/api';
+
+interface Missao {
+    id_missao: number;
+    data: string;
+    descricao: string;
+}
 
 const Home: React.FC = () => {
+
+    const [missao, setMissao] = useState<Missao | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      async function carregar() {
+        try {
+          // Chamando seu serviço que usa fetch
+          const resultado = await getProximaMissao();
+
+          // Agora o log funciona porque está DENTRO do try
+          console.log("MISSÃO RECEBIDA DO FASTAPI:", resultado);
+
+          setMissao(resultado);
+        } catch (error) {
+          console.error("Erro na requisição:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+      carregar();
+    }, []);
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
@@ -21,8 +50,20 @@ const Home: React.FC = () => {
       {/* Card Próxima Missão */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Próxima Missão</Text>
-        <Text style={styles.cardDate}>Quarta-feira, 03 de Maio</Text>
-
+          {loading ? (
+            <ActivityIndicator size="small" />
+          ) : missao ? (
+            <>
+              <Text style={styles.cardDate}>
+                {/* Usando a função aqui */}
+                {formatarDataBR(missao.data)}
+              </Text>
+              {/* Exemplo: exibindo a descrição também se quiser */}
+              <Text style={styles.description}>{missao.descricao}</Text>
+            </>
+          ) : (
+            <Text>Nenhuma missão encontrada</Text>
+          )}
         <View style={styles.cardInfo}>
           <Text>🕒 Início às 19:00</Text>
           <Text>📍 Paroquia São Miguel Arcanjo</Text>

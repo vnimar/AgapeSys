@@ -1,5 +1,14 @@
 import { StyleSheet } from 'react-native';
 
+export const formatarDataBR = (dataString: string | undefined) => {
+  if (!dataString) return "Sem data";
+
+  // Divide a string "2026-02-27" em ["2026", "02", "27"]
+  const [ano, mes, dia] = dataString.split('-');
+
+  // Retorna no formato brasileiro
+  return `${dia}/${mes}/${ano}`;
+};
 
 export const styles = StyleSheet.create({
   container: {
