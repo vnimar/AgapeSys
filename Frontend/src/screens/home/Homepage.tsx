@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native';
-import { formatarDataBR, styles } from './Home.styles.ts'; import { Image } from 'react-native';
+import { formatarDataBR, styles } from './Home.styles'; import { Image } from 'react-native';
 import { getProximaMissao } from '../../services/api';
 
 interface Missao {
@@ -32,8 +33,11 @@ const Home: React.FC = () => {
       }
       carregar();
     }, []);
+
   return (
-    <ScrollView style={styles.container}>
+   <SafeAreaView style={{ flex: 1 }}>
+    <ScrollView contentContainerStyle={styles.container}>
+
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -47,23 +51,24 @@ const Home: React.FC = () => {
           style={styles.logoImage}
         />
       </View>
+
       {/* Card Próxima Missão */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Próxima Missão</Text>
+
           {loading ? (
             <ActivityIndicator size="small" />
           ) : missao ? (
             <>
               <Text style={styles.cardDate}>
-                {/* Usando a função aqui */}
                 {formatarDataBR(missao.data)}
               </Text>
-              {/* Exemplo: exibindo a descrição também se quiser */}
               <Text style={styles.description}>{missao.descricao}</Text>
             </>
           ) : (
             <Text>Nenhuma missão encontrada</Text>
           )}
+
         <View style={styles.cardInfo}>
           <Text>🕒 Início às 19:00</Text>
           <Text>📍 Paroquia São Miguel Arcanjo</Text>
@@ -104,6 +109,7 @@ const Home: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+   </SafeAreaView>
   );
 };
 
