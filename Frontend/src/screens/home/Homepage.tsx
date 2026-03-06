@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Link } from "expo-router";
 import { View, Text, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native';
 import { formatarDataBR, styles } from './Home.styles'; import { Image } from 'react-native';
 import { getProximaMissao } from '../../services/api';
@@ -77,9 +78,14 @@ const Home: React.FC = () => {
 
       {/* Grid de Ações */}
       <View style={styles.grid}>
-        <TouchableOpacity style={[styles.button, styles.green]}>
-          <Text style={styles.buttonText}>Lista de Servos</Text>
-        </TouchableOpacity>
+
+
+            <TouchableOpacity style={[styles.button, styles.green]}>
+              <Link href="/servo" asChild>
+              <Text style={styles.buttonText}>Lista de Servos</Text>
+              </Link>
+            </TouchableOpacity>
+
 
         <TouchableOpacity style={[styles.button, styles.purple]}>
           <Text style={styles.buttonText}>Calendário</Text>
