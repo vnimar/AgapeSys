@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import { styles } from './Servo.style'
 
 export default function ServosScreen() {
@@ -27,8 +28,8 @@ export default function ServosScreen() {
 
         {isExpanded && (
           <View style={styles.details}>
-            <Text>Telefone: {item.telefone}</Text>
-            <Text>Pastas: {item.pastas.join(", ")}</Text>
+            <Text style={styles.info}>📞 {item.telefone}</Text>
+            <Text style={styles.info}>📁 {item.pastas.join(", ")}</Text>
           </View>
         )}
       </View>
@@ -36,14 +37,25 @@ export default function ServosScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Servos</Text>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container}>
 
-      <FlatList
-        data={servos}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-      />
-    </View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Lista de Servos</Text>
+
+            <Image
+              source={require('../../assets/images/logoAgapeJovensDiscipuladoPSMA.png')}
+              style={styles.logo}
+            />
+          </View>
+
+          <FlatList
+            data={servos}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+          />
+
+        </View>
+      </SafeAreaView>
   );
 }
