@@ -1,14 +1,19 @@
 //Url alterar para ip maquina ate subir vercel
-const BASE_URL = "http://192.168.68.102:8000/";
-//const BASE_URL = "http://127.0.0.1:8000/";
+const BASE_URL = "http://192.168.0.5:8000";
 
-export async function getProximaMissao() {
-    const response = await fetch(`${BASE_URL}missao/proxima`);
+export async function apiRequest(endpoint: string, options?: RequestInit) {
+
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options?.headers || {})
+    },
+    ...options
+    });
 
     if (!response.ok) {
-        throw new Error("Erro ao buscar próxima missão");
+    throw new Error("Erro na requisição");
     }
 
-    const data = await response.json();
-    return data;
+    return response.json();
 }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from "expo-router";
-import { View, Text, ScrollView, TouchableOpacity,ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { formatarDataBR, styles } from './Home.styles'; import { Image } from 'react-native';
-import { getProximaMissao } from '../../services/api';
+import { getProximaMissao } from '../../services/missao/missao';
 
 interface Missao {
     id_missao: number;

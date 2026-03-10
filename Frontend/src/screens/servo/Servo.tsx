@@ -1,17 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from "react-native";
 import { styles } from './Servo.style'
+import { getUsers } from '../../services/users/users'
+
+interface Servos{
+    id: number;
+    nome: string;
+    telefone: string;
+    pastas: string[];
+
+}
 
 export default function ServosScreen() {
 
+  const [servos, setServos] = useState<Servos[]>([]);
   const [expandedId, setExpandedId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const servos = [
-    { id: 1, nome: "João Silva", telefone: "61 99999-1111", pastas: ["Música", "Intercessão"] },
-    { id: 2, nome: "Maria Souza", telefone: "61 98888-2222", pastas: ["Evangelização"] },
-    { id: 3, nome: "Pedro Santos", telefone: "61 97777-3333", pastas: ["Acolhida", "Liturgia"] },
-  ];
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const data = await getUsers();
+        setServos(data);
+      } catch (error) {
+        console.log("Erro ao buscar servos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregar();
+  }, []);
 
   function toggleExpand(id) {
     setExpandedId(expandedId === id ? null : id);
@@ -34,6 +54,10 @@ export default function ServosScreen() {
         )}
       </View>
     );
+  }
+
+  if (loading) {
+    return <ActivityIndicator size="large" />;
   }
 
   return (

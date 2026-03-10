@@ -5,27 +5,42 @@ import psycopg2.extras
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/")
-def list_users():
-    conn = getConnection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) # RealDictCursor para que resultado seja em forma de dicionários
+def listar_servos():
+    conn = None
 
     try:
-        cursor.execute("""
-            SELECT id_servo, nome, telefone, status, ano_ingresso
-            FROM servo
-        """)
+        conn = getConnection()
 
-        users = cursor.fetchall()
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            query = """
+                    SELECT 
+                        s.id_servo AS id,
+                        s.nome,
+                        s.telefone,
+                        COALESCE(
+                            json_agg(p.nome) FILTER (WHERE p.nome IS NOT NULL),
+                            '[]'
+                        ) AS pastas
+                    FROM servo s
+                    LEFT JOIN servo_pasta sp ON sp.id_servo = s.id_servo
+                    LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta
+                    GROUP BY s.id_servo
+                    ORDER BY s.nome
+                """
+            cursor.execute(query)
+            servos = cursor.fetchall()
 
-        conn.close()
+        return servos
 
-        return users
+    except psycopg2.Error as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao buscar servos: {str(e)}"
+        )
 
-    except Exception as e:
+    finally:
         if conn:
             conn.close()
-        print(f"Erro no GET Users: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{user_id}")
 def home(user_id: int):
