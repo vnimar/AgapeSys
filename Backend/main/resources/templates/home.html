@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgapeSys API</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,#F5F7F6,#e9efec);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    background:white;
+    padding:50px;
+    border-radius:20px;
+    width:420px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+    animation:fadeIn 0.8s ease;
+}
+
+.logo{
+    font-size:60px;
+    margin-bottom:10px;
+}
+
+h1{
+    color:#3c3c3c;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    color:#777;
+    margin-bottom:25px;
+}
+
+.status{
+    display:inline-block;
+    padding:8px 15px;
+    border-radius:20px;
+    background:#e6f6ea;
+    color:#2f8f4e;
+    font-weight:bold;
+    margin-bottom:30px;
+}
+
+.btn{
+    display:inline-block;
+    background:#92C7A3;
+    color:white;
+    text-decoration:none;
+    padding:14px 28px;
+    border-radius:30px;
+    font-weight:bold;
+    transition:all 0.3s ease;
+}
+
+.btn:hover{
+    background:#76a885;
+    transform:translateY(-2px);
+}
+
+.footer{
+    margin-top:30px;
+    font-size:13px;
+    color:#999;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">🧠</div>
+
+<h1>AgapeSys API</h1>
+
+<p class="subtitle">
+Backend responsável pelo processamento e integração do sistema.
+</p>
+
+<div class="status">
+● Sistema Online
+</div>
+
+<br>
+
+<a href="/docs" class="btn">
+Acessar Documentação
+</a>
+
+<div class="footer">
+FastAPI Backend • Swagger disponível em /docs
+</div>
+
+</div>
+
+</body>
+</html>

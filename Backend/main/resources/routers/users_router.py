@@ -7,7 +7,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/")
 def list_users():
     conn = getConnection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) # RealDictCursor para que resultado seja em forma de dicionários
 
     try:
         cursor.execute("""
@@ -19,7 +19,7 @@ def list_users():
 
         conn.close()
 
-        return users  # já retorna lista de dicionários
+        return users
 
     except Exception as e:
         if conn:

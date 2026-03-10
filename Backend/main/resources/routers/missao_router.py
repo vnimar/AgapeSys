@@ -5,12 +5,36 @@ from datetime import date
 
 router = APIRouter(prefix="/missao", tags=["missao"])
 
+@router.get("/")
+def get_missao():
+    conn = getConnection()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            query = """SELECT * FROM missao ORDER BY data ASC"""
+            cursor.execute(query)
+            missoes = cursor.fetchall()
+
+            if not missoes:
+                raise HTTPException(status_code=404, detail="Nenhuma missão futura encontrada")
+
+            for missao in missoes:
+                if isinstance(missao["data"], date):
+                    missao["data"] = missao["data"].isoformat()
+
+            return missoes
+
+    except Exception as e:
+        print(f"Erro ao buscar próxima missão: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+    finally:
+        if conn:
+            conn.close()
+
 @router.get("/proxima")
 def get_proxima_missao():
-    conn = None
+    conn = getConnection()
     try:
-        conn = getConnection()
-        # O 'with' garante que o cursor feche sozinho ao sair do bloco
+        # Com o 'with' garante que o cursor feche sozinho ao sair do bloco
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
             query = "SELECT id_missao, data, descricao FROM missao WHERE data >= CURRENT_DATE ORDER BY data ASC LIMIT 1"
             cursor.execute(query)
