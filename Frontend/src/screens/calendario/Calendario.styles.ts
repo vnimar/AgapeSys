@@ -1,33 +1,36 @@
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 20,
+    backgroundColor: "#F5F5F5",
+    padding: 20
   },
 
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 20
   },
 
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#1E3A8A",
+    fontWeight: "bold"
   },
 
   logo: {
     width: 40,
     height: 40,
-    resizeMode: "contain",
+    resizeMode: "contain"
   },
 
-      card: {
+  list: {
+    paddingBottom: 20
+  },
+
+    card: {
     backgroundColor: "#FFFFFF",
     padding: 16,
     borderRadius: 12,
@@ -42,27 +45,34 @@ const styles = StyleSheet.create({
     shadowOffset: {
       width: 0,
       height: 2,
-      },
+    },
 
     elevation: 2,
   },
 
-  nome: {
+  data: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#1F2937",
+    fontWeight: "bold"
   },
 
   details: {
-    marginTop: 10,
+    marginTop: 10
+  },
+
+  text: {
+    fontSize: 15,
+    marginBottom: 4,
+    color: '#555'
+  },
+
+  missao: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 6
   },
 
   info: {
-    fontSize: 15,
-    marginTop: 4,
-    color: "#374151",
-  },
+    marginTop: 6
+  }
 
 });
-
-export { styles };

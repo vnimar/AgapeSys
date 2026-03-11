@@ -88,7 +88,9 @@ const Home: React.FC = () => {
 
 
         <TouchableOpacity style={[styles.button, styles.purple]}>
+          <Link href="/calendario" asChild>
           <Text style={styles.buttonText}>Calendário</Text>
+          </Link>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.blue]}>
