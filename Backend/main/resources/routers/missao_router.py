@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from ..bd.db import getConnection
 import psycopg2.extras
 from datetime import date
+from ..config.missao_config import MISSAO_INFO
 
 router = APIRouter(prefix="/missao", tags=["missao"])
 
@@ -11,6 +12,7 @@ def get_missao():
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
             query = """SELECT * FROM missao ORDER BY data ASC"""
+
             cursor.execute(query)
             missoes = cursor.fetchall()
 
@@ -20,6 +22,8 @@ def get_missao():
             for missao in missoes:
                 if isinstance(missao["data"], date):
                     missao["data"] = missao["data"].isoformat()
+
+                adicionar_info_missao(missao)
 
             return missoes
 
@@ -55,3 +59,13 @@ def get_proxima_missao():
     finally:
         if conn:
             conn.close()
+
+
+def adicionar_info_missao(missao):
+
+    info = MISSAO_INFO.get(missao["descricao"], {})
+
+    missao["local"] = info.get("local", "Local não definido")
+    missao["horario"] = info.get("horario", "Horário não definido")
+
+    return missao
