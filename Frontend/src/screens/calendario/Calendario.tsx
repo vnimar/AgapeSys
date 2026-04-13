@@ -1,63 +1,56 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from "react-native";
 import { styles } from "./Calendario.styles";
+import { getMissoes } from '../../services/missao/missao'
 
-type Missao = {
-  id: string;
+interface Missao {
+  id_missao: number;
   data: string;
-  missao: string;
+  descricao: string;
   local: string;
   horario: string;
 };
 
 export default function CalendarioScreen() {
 
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [missoes, setMissoes] = useState<Missao[]>([]);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const missoes: Missao[] = [
-    {
-      id: "1",
-      data: "12 MAR",
-      missao: "Formação de Cursista",
-      local: "Paróquia São Miguel",
-      horario: "15:30"
-    },
-    {
-      id: "2",
-      data: "19 MAR",
-      missao: "Ação social",
-      local: "Comunidade Santa Rita",
-      horario: "14:30"
-    },
-    {
-      id: "3",
-      data: "26 MAR",
-      missao: "Formação de Servos",
-      local: "Capela NSS das Graças",
-      horario: "19:30"
+  useEffect(() =>{
+    async function carregar(){
+      try{
+        const data = await getMissoes()
+        setMissoes(data)
+      } catch(error){
+         console.log(error)
+      } finally{
+        setLoading(false)
+      }
     }
-  ];
+    carregar()
+  },[])
 
-  const toggleExpand = (id: string) => {
+  const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
   const renderItem = ({ item }: { item: Missao }) => {
 
-    const expanded = item.id === expandedId;
+    const expanded = item.id_missao === expandedId;
 
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => toggleExpand(item.id)}
+        onPress={() => toggleExpand(item.id_missao)}
       >
 
         <Text style={styles.data}>{item.data}</Text>
 
         {expanded && (
           <View style={styles.details}>
-            <Text style={styles.text}>Missão: {item.missao}</Text>
+            <Text style={styles.text}>Missão: {item.descricao}</Text>
             <Text style={styles.text}>📍 {item.local}</Text>
             <Text style={styles.text}>🕒 {item.horario}</Text>
           </View>
@@ -66,6 +59,10 @@ export default function CalendarioScreen() {
       </TouchableOpacity>
     );
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,7 +78,7 @@ export default function CalendarioScreen() {
 
       <FlatList
         data={missoes}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id_missao.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
       />

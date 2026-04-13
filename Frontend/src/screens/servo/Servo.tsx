@@ -4,12 +4,11 @@ import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from
 import { styles } from './Servo.style'
 import { getUsers } from '../../services/users/users'
 
-interface Servos{
+interface Servos {
     id: number;
     nome: string;
     telefone: string;
     pastas: string[];
-
 }
 
 export default function ServosScreen() {

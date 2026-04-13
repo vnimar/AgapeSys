@@ -19,12 +19,8 @@ const Home: React.FC = () => {
     useEffect(() => {
       async function carregar() {
         try {
-          // Chamando seu serviço que usa fetch
           const resultado = await getProximaMissao();
-
-          // Agora o log funciona porque está DENTRO do try
-          console.log("MISSÃO RECEBIDA DO FASTAPI:", resultado);
-
+          //console.log("MISSÃO RECEBIDA DO FASTAPI:", resultado);
           setMissao(resultado);
         } catch (error) {
           console.error("Erro na requisição:", error);
