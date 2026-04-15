@@ -1,4 +1,4 @@
-import { StyleSheet, Platform  } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const VERDE = "#1D9E75";
 export const VERDE_LIGHT = "#E6F7F2";
@@ -12,6 +12,202 @@ export const VERMELHO_DARK = "#C0392B";
 
 export const styles = StyleSheet.create({
 
+  // ── Container principal ──
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+
+  // ── Header ──
+  header: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 16 : 12,
+    paddingBottom: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#E0E0E0",
+  },
+
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    marginBottom: 12,
+  },
+
+  missaoSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 0.5,
+    borderColor: "#E0E0E0",
+  },
+
+  missaoSelectorLabel: {
+    fontSize: 12,
+    color: "#888",
+    marginRight: 8,
+    minWidth: 42,
+  },
+
+  missaoSelectorValue: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1A1A1A",
+    fontWeight: "500",
+  },
+
+  missaoSelectorChevron: {
+    fontSize: 20,
+    color: "#888",
+    marginLeft: 8,
+  },
+
+  badgeLancada: {
+    marginTop: 8,
+    backgroundColor: VERDE_LIGHT,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignSelf: "flex-start",
+  },
+
+  badgeLancadaText: {
+    fontSize: 12,
+    color: VERDE_DARK,
+    fontWeight: "500",
+  },
+
+  badgeEdicao: {
+    marginTop: 8,
+    backgroundColor: AMARELO_LIGHT,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignSelf: "flex-start",
+  },
+
+  badgeEdicaoText: {
+    fontSize: 12,
+    color: AMARELO_DARK,
+    fontWeight: "500",
+  },
+
+  // ── Estado vazio ──
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+
+  emptyStateIcon: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+
+  emptyStateText: {
+    fontSize: 16,
+    color: "#888",
+    fontWeight: "500",
+  },
+
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: "#AAA",
+    marginTop: 4,
+  },
+
+  // ── Lista ──
+  listContent: {
+    paddingBottom: 8,
+    backgroundColor: "#fff",
+  },
+
+  separator: {
+    height: 0.5,
+    backgroundColor: "#F0F0F0",
+    marginLeft: 72,
+  },
+
+  // ── Linha de servo ──
+  servoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: "#fff",
+  },
+
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: VERDE_LIGHT,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+    flexShrink: 0,
+  },
+
+  avatarText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: VERDE_DARK,
+  },
+
+  servoNome: {
+    flex: 1,
+    fontSize: 15,
+    color: "#1A1A1A",
+  },
+
+  statusButtons: {
+    flexDirection: "row",
+    gap: 6,
+  },
+
+  statusBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#D0D0D0",
+    backgroundColor: "#F5F5F5",
+  },
+
+  // Estilos dinâmicos de status — acessados via styles[`statusBtn_${s}`]
+  statusBtn_Presente: {
+    backgroundColor: VERDE_LIGHT,
+    borderColor: VERDE,
+  },
+
+  statusBtn_Justificada: {
+    backgroundColor: AMARELO_LIGHT,
+    borderColor: "#BA7517",
+  },
+
+  statusBtn_Falta: {
+    backgroundColor: VERMELHO_LIGHT,
+    borderColor: "#E24B4A",
+  },
+
+  statusBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#999",
+  },
+
+  statusBtnText_Presente: { color: VERDE_DARK },
+  statusBtnText_Justificada: { color: AMARELO_DARK },
+  statusBtnText_Falta: { color: VERMELHO_DARK },
+
+  // ── Footer ──
   footer: {
     backgroundColor: "#fff",
     borderTopWidth: 0.5,
@@ -37,6 +233,7 @@ export const styles = StyleSheet.create({
   counterPresente: { backgroundColor: VERDE_LIGHT },
   counterJustificada: { backgroundColor: AMARELO_LIGHT },
   counterFalta: { backgroundColor: VERMELHO_LIGHT },
+
   counterNum: {
     fontSize: 20,
     fontWeight: "600",
@@ -45,6 +242,7 @@ export const styles = StyleSheet.create({
   counterNumPresente: { color: VERDE_DARK },
   counterNumJustificada: { color: AMARELO_DARK },
   counterNumFalta: { color: VERMELHO_DARK },
+
   counterLabel: {
     fontSize: 11,
     marginTop: 2,
@@ -53,6 +251,7 @@ export const styles = StyleSheet.create({
   counterLabelPresente: { color: VERDE_DARK },
   counterLabelJustificada: { color: AMARELO_DARK },
   counterLabelFalta: { color: VERMELHO_DARK },
+
   actionButtons: {
     flexDirection: "row",
     gap: 10,
