@@ -1,4 +1,14 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform  } from "react-native";
+
+export const VERDE = "#1D9E75";
+export const VERDE_LIGHT = "#E6F7F2";
+export const VERDE_DARK = "#0F6B4F";
+
+export const AMARELO_LIGHT = "#FFF6E5";
+export const AMARELO_DARK = "#C98A00";
+
+export const VERMELHO_LIGHT = "#FFEAEA";
+export const VERMELHO_DARK = "#C0392B";
 
 export const styles = StyleSheet.create({
 

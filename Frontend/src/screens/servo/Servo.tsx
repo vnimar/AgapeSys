@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from "react-native";
 import { styles } from './Servo.style'
-import { getUsers } from '../../services/users/users'
+import { getServos } from '../../services/servos/servos'
 
 interface Servos {
     id: number;
@@ -20,7 +20,7 @@ export default function ServosScreen() {
   useEffect(() => {
     async function carregar() {
       try {
-        const data = await getUsers();
+        const data = await getServos();
         setServos(data);
       } catch (error) {
         console.log("Erro ao buscar servos:", error);

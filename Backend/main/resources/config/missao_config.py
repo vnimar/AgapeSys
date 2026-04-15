@@ -31,10 +31,6 @@ MISSAO_INFO = {
         "local": "Paróquia São Miguel",
         "horario": "14:30"
     },
-    "Missa Mensal do Ágape":{
-        "local": "Paróquia São Miguel",
-        "horario": "14:30"
-    },
     "Noite de Louvor":{
         "local": "Paróquia São Miguel",
         "horario": "14:30"

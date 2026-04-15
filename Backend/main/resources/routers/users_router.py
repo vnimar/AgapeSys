@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from ..bd.db import getConnection
 import psycopg2.extras
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/servos", tags=["Servos"])
 
 @router.get("/")
 def listar_servos():
@@ -42,15 +42,15 @@ def listar_servos():
         if conn:
             conn.close()
 
-@router.get("/{user_id}")
-def home(user_id: int):
+@router.get("/{servos_id}")
+def get_servo_by_id(servos_id: int):
     conn = getConnection()
     cursor = conn.cursor()
 
     try:
         cursor.execute(
             "SELECT id_servo, nome, telefone, status, ano_ingresso FROM servo WHERE id_servo = %s",
-            (user_id,)
+            (servos_id,)
         )
 
         user = cursor.fetchone()

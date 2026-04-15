@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, ActivityIndicator,
+  View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator,
   Alert, Modal, ScrollView, Platform, StatusBar,
 } from "react-native";
 import { styles } from "./Frequencia.styles";
+import { getMissoes } from '../../services/missao/missao'
+import { getServos } from '../../services/servos/servos'
+import { getFrequencia, getFrequenciaById } from '../../services/frequencia/frequencia'
 
 type StatusFrequencia = "Presente" | "Falta" | "Justificada";
 
@@ -41,38 +45,31 @@ export default function FrequenciaScreen() {
   const [loadingServos, setLoadingServos] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [modalMissoesVisible, setModalMissoesVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Buscar a missão
   useEffect(() => {
-    buscarMissoes();
-    buscarServos();
+    carregarDados();
   }, []);
 
-  const buscarMissoes = async () => {
+  const carregarDados = async () => {
     setLoadingMissoes(true);
+    setLoadingServos(true);
+
     try {
-      const res = await fetch(`${API_BASE_URL}/missoes`);
-      const data: Missao[] = await res.json();
-      // Ordena do mais recente para o mais antigo
-      data.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-      setMissoes(data);
+      const missoesData = await getMissoes();
+      const servosData = await getServos();
+
+      missoesData.sort((a: Missao, b: Missao) =>
+        new Date(a.data).getTime() - new Date(b.data).getTime()
+      );
+
+      setMissoes(missoesData);
+      setServos(servosData);
     } catch {
-      Alert.alert("Erro", "Não foi possível carregar as missões.");
+      Alert.alert("Erro", "Falha ao carregar dados");
     } finally {
       setLoadingMissoes(false);
-    }
-  };
-
-  // Selecionar missao
-  const buscarServos = async () => {
-    setLoadingServos(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/servos`);
-      const data: Servo[] = await res.json();
-      setServos(data);
-    } catch {
-      Alert.alert("Erro", "Não foi possível carregar os servos.");
-    } finally {
       setLoadingServos(false);
     }
   };
@@ -82,31 +79,33 @@ export default function FrequenciaScreen() {
     setModalMissoesVisible(false);
     setModoEdicao(false);
 
-    // Inicializa attendance com null para todos os servos
     const initialAttendance: Record<number, StatusFrequencia | null> = {};
     servos.forEach((s) => (initialAttendance[s.id_servo] = null));
     setAttendance(initialAttendance);
 
-    // Verifica se já existe frequência lançada
     try {
-      const res = await fetch(`${API_BASE_URL}/frequencia/${missao.id_missao}`);
+      const res = await getFrequenciaById(missao.id_missao); //fetch(`${API_BASE_URL}/frequencia/${missao.id_missao}`);
       if (res.ok) {
-        const existente: FrequenciaExistente[] = await res.json();
+        const response = await res.json();
+        const existente = response.data || [];
+
         if (existente.length > 0) {
           setFrequenciaExistente(existente);
-          // Preenche os status já registrados
-          const preenchido: Record<number, StatusFrequencia | null> = { ...initialAttendance };
-          existente.forEach((f) => {
+
+          const preenchido: Record<number, StatusFrequencia | null> = {
+            ...initialAttendance,
+          };
+
+          existente.forEach((f: any) => {
             preenchido[f.id_servo] = f.status;
           });
+
           setAttendance(preenchido);
-          setModoEdicao(false); // mostra botão "Atualizar" mas não em modo edição ainda
         } else {
           setFrequenciaExistente([]);
         }
       }
     } catch {
-      // Se der erro, assume que não existe frequência
       setFrequenciaExistente([]);
     }
   }, [servos]);
@@ -267,7 +266,7 @@ export default function FrequenciaScreen() {
 
   // Render
   return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
         {/* ── Header fixo ── */}
@@ -314,7 +313,7 @@ export default function FrequenciaScreen() {
         ) : (
           <FlatList
             data={servos}
-            keyExtractor={(item) => String(item.id_servo)}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={renderServos}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}

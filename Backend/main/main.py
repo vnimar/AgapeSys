@@ -2,8 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from pathlib import Path
 from fastapi.templating import Jinja2Templates
-from resources.routers import missao_router, users_router
-
+from resources.routers import missao_router, users_router, frequencia_router
 
 app = FastAPI(
     title="AgapeSys Api",
@@ -26,3 +25,4 @@ def home(request: Request):
 
 app.include_router(users_router.router)
 app.include_router(missao_router.router)
+app.include_router(frequencia_router.router)
