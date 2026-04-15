@@ -90,7 +90,9 @@ const Home: React.FC = () => {
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.blue]}>
+          <Link href="/frequencia" asChild>
           <Text style={styles.buttonText}>Chamada</Text>
+          </Link>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, styles.orange]}>

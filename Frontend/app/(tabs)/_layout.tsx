@@ -41,6 +41,15 @@ export default function TabLayout() {
             ),
         }}
       />
+      <Tabs.Screen
+        name="frequencia"
+        options={{
+            title: 'Frequencia',
+            tabBarIcon: ({ color }) => (
+                <IconSymbol size={28} name="person.4.fill" color={color} />
+            ),
+        }}
+      />
     </Tabs>
   );
 }
