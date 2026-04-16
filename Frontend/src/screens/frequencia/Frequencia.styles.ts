@@ -11,7 +11,6 @@ export const VERMELHO_LIGHT = "#FFEAEA";
 export const VERMELHO_DARK = "#C0392B";
 
 export const styles = StyleSheet.create({
-
   // ── Container principal ──
   safeArea: {
     flex: 1,
@@ -181,7 +180,6 @@ export const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
 
-  // Estilos dinâmicos de status — acessados via styles[`statusBtn_${s}`]
   statusBtn_Presente: {
     backgroundColor: VERDE_LIGHT,
     borderColor: VERDE,
@@ -207,7 +205,7 @@ export const styles = StyleSheet.create({
   statusBtnText_Justificada: { color: AMARELO_DARK },
   statusBtnText_Falta: { color: VERMELHO_DARK },
 
-  // ── Footer ──
+  // ── Footer e Botões (CORRIGIDOS) ──
   footer: {
     backgroundColor: "#fff",
     borderTopWidth: 0.5,
@@ -257,23 +255,25 @@ export const styles = StyleSheet.create({
     gap: 10,
   },
 
+  // Botão Confirmar (verde)
   btnConfirmar: {
-    flex: 1,
     backgroundColor: VERDE,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 48,
   },
-
   btnConfirmarText: {
-    color: "#fff",
-    fontSize: 15,
+    color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "600",
+    textAlign: "center",
+    includeFontPadding: false,
   },
 
+  // Botão Editar (cinza claro)
   btnAtualizar: {
-    flex: 1,
     backgroundColor: "#F5F5F5",
     borderRadius: 12,
     paddingVertical: 14,
@@ -281,15 +281,15 @@ export const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#E0E0E0",
   },
-
   btnAtualizarText: {
     color: "#1A1A1A",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "500",
+    textAlign: "center",
   },
 
+  // Botão Cancelar
   btnCancelar: {
-    flex: 1,
     backgroundColor: "#F5F5F5",
     borderRadius: 12,
     paddingVertical: 14,
@@ -297,11 +297,11 @@ export const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#E0E0E0",
   },
-
   btnCancelarText: {
-    color: "#666",
-    fontSize: 15,
+    color: "#666666",
+    fontSize: 16,
     fontWeight: "500",
+    textAlign: "center",
   },
 
   btnDisabled: {
