@@ -77,42 +77,47 @@ export default function FrequenciaScreen() {
   const selecionarMissao = useCallback(async (missao: Missao) => {
     setMissaoSelecionada(missao);
     setModalMissoesVisible(false);
-    setModoEdicao(false);
+    setModoEdicao(false); // Sempre começa bloqueado para missões existentes
 
+    // Resetar o estado de presença antes da busca
     const initialAttendance: Record<number, StatusFrequencia | null> = {};
     servos.forEach((s) => (initialAttendance[s.id_servo] = null));
     setAttendance(initialAttendance);
 
     try {
-      const res = await getFrequenciaById(missao.id_missao); //fetch(`${API_BASE_URL}/frequencia/${missao.id_missao}`);
-      if (res.ok) {
-        const response = await res.json();
-        const existente = response.data || [];
+      // Busca a frequência no backend
+      const response = await getFrequenciaById(missao.id_missao);
 
-        if (existente.length > 0) {
-          setFrequenciaExistente(existente);
+      // O backend retorna um objeto com "data" contendo a lista
+      if (response && response.data && response.data.length > 0) {
+        const existente = response.data;
+        setFrequenciaExistente(existente);
 
-          const preenchido: Record<number, StatusFrequencia | null> = {
-            ...initialAttendance,
-          };
+        const preenchido: Record<number, StatusFrequencia | null> = { ...initialAttendance };
 
-          existente.forEach((f: any) => {
-            preenchido[f.id_servo] = f.status;
-          });
+        // Mapeia os status vindos do banco para o estado do componente
+        existente.forEach((f: any) => {
+          preenchido[f.id_servo] = f.status;
+        });
 
-          setAttendance(preenchido);
-        } else {
-          setFrequenciaExistente([]);
-        }
+        setAttendance(preenchido);
+      } else {
+        setFrequenciaExistente([]);
       }
-    } catch {
+    } catch (error) {
+      console.error("Erro ao buscar frequência:", error);
       setFrequenciaExistente([]);
     }
   }, [servos]);
 
   // Marcar status do servo
 
+  // Altere a lógica de marcar status para respeitar o modo de edição
   const marcarStatus = (id_servo: number, status: StatusFrequencia) => {
+    if (!podeEditar) {
+      Alert.alert("Acesso Negado", "Habilite o modo de edição para alterar a frequência.");
+      return;
+    }
     setAttendance((prev) => ({ ...prev, [id_servo]: status }));
   };
 
