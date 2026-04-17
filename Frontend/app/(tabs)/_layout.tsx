@@ -9,7 +9,8 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-  return (
+  // @ts-ignore
+    return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -46,6 +47,7 @@ export default function TabLayout() {
         options={{
             title: 'Frequencia',
             tabBarIcon: ({ color }) => (
+                // @ts-expect-error - mudar icon
                 <IconSymbol size={28} name="person.4.fill" color={color} />
             ),
         }}

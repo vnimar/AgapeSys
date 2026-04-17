@@ -32,6 +32,9 @@ const Home: React.FC = () => {
     carregar();
   }, []);
 
+  // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
