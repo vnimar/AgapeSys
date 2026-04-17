@@ -3,13 +3,20 @@ from fastapi import APIRouter, HTTPException
 from ..bd.db import getConnection
 import psycopg2.extras
 from datetime import date
-from ..schemas.frequencia_schema import FrequenciaCreate, FrequenciaUpdate
+from ..schemas.frequencia_schema import (
+    FrequenciaCreate,
+    FrequenciaUpdate,
+    FrequenciaResponse,
+    FrequenciaEmptyResponse,
+    MessageResponse,
+)
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/frequencia", tags=["frequencia"])
+router = APIRouter(prefix="/frequencia", tags=["Frequência"])
 
-@router.post("/")
+
+@router.post("/register", response_model=MessageResponse, status_code=201)
 def register_frequencia(body: FrequenciaCreate):
     conn = getConnection()
 
@@ -35,29 +42,24 @@ def register_frequencia(body: FrequenciaCreate):
 
             # 3. Verificar duplicidade
             cursor.execute("""
-                SELECT id_frequencia
-                FROM frequencia
+                SELECT id_frequencia FROM frequencia
                 WHERE id_servo = %s AND id_missao = %s
             """, (body.id_servo, body.id_missao))
 
             if cursor.fetchone():
-                raise HTTPException(
-                    status_code=400,
-                    detail="Registro já existe. Use edição."
-                )
+                raise HTTPException(status_code=409, detail="Registro já existe. Use edição.")
 
-            # 4. Inserir
+            # 4. Inserir com status
             cursor.execute(
                 """
-                INSERT INTO frequencia (id_servo, id_missao, data)
-                VALUES (%s, %s, %s)
+                INSERT INTO frequencia (id_servo, id_missao, status, data)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (body.id_servo, body.id_missao, date.today())
+                (body.id_servo, body.id_missao, body.status, date.today())
             )
-
             conn.commit()
 
-        return {"message": "Frequência registrada com sucesso!"}
+        return MessageResponse(message="Frequência registrada com sucesso!")
 
     except HTTPException:
         raise
@@ -65,20 +67,19 @@ def register_frequencia(body: FrequenciaCreate):
     except Exception as e:
         logger.error(f"Erro ao registrar frequência: {e}")
         conn.rollback()
-        raise HTTPException(status_code=500, detail="Erro interno")
+        raise HTTPException(status_code=500, detail="Erro interno.")
 
     finally:
         conn.close()
 
 
-@router.get("/{id_missao}")
+@router.get("/{id_missao}", response_model=FrequenciaResponse | FrequenciaEmptyResponse)
 def get_frequencia(id_missao: int):
     conn = getConnection()
 
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
 
-            # 1. Verifica se a missão existe
             cursor.execute(
                 "SELECT data, descricao FROM missao WHERE id_missao = %s",
                 (id_missao,)
@@ -86,28 +87,22 @@ def get_frequencia(id_missao: int):
             missao = cursor.fetchone()
 
             if not missao:
-                raise HTTPException(status_code=404, detail="Essa missão não existe.")
+                raise HTTPException(status_code=404, detail="Missão não encontrada.")
 
-            # 2. Verifica se existe frequência
             cursor.execute("""
-                SELECT id_frequencia
-                FROM frequencia
-                WHERE id_missao = %s
-                LIMIT 1
+                SELECT id_frequencia FROM frequencia
+                WHERE id_missao = %s LIMIT 1
             """, (id_missao,))
 
             existe = cursor.fetchone()
 
-            # 3. Se NÃO existe frequência
             if existe is None:
-                return {
-                    "message": "Missão existe, mas ainda não há registros de frequência.",
-                    "data_missao": missao["data"],
-                    "descricao": missao["descricao"],
-                    "data": []
-                }
+                return FrequenciaEmptyResponse(
+                    message="Missão existe, mas ainda não há registros de frequência.",
+                    data_missao=missao["data"].isoformat(),
+                    descricao=missao["descricao"],
+                )
 
-            # 4. Se EXISTE frequência → busca dados
             cursor.execute("""
                 SELECT
                     s.id_servo,
@@ -121,33 +116,31 @@ def get_frequencia(id_missao: int):
 
             dados = cursor.fetchall()
 
-            return {
-                "message": "Frequência encontrada.",
-                "data_missao": missao["data"],
-                "descricao": missao["descricao"],
-                "data": dados
-            }
+            return FrequenciaResponse(
+                message="Frequência encontrada.",
+                data_missao=missao["data"].isoformat(),
+                descricao=missao["descricao"],
+                data=[dict(d) for d in dados],
+            )
 
     except HTTPException:
         raise
 
     except Exception as e:
-        logger.error(f"Erro ao buscar frequência: {e}")
-        conn.rollback()
-        raise HTTPException(status_code=500, detail="Erro interno")
+        logger.error(f"Erro ao buscar frequência da missão {id_missao}: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno.")
 
     finally:
         conn.close()
 
 
-@router.put("/")
+@router.put("/update", response_model=MessageResponse)
 def update_frequencia(body: FrequenciaUpdate):
     conn = getConnection()
 
     try:
         with conn.cursor() as cursor:
 
-            # Validar missão
             cursor.execute(
                 "SELECT data FROM missao WHERE id_missao = %s",
                 (body.id_missao,)
@@ -163,7 +156,6 @@ def update_frequencia(body: FrequenciaUpdate):
                     detail="Não é possível editar antes da missão acontecer."
                 )
 
-            # Update
             cursor.execute(
                 """
                 UPDATE frequencia
@@ -178,7 +170,7 @@ def update_frequencia(body: FrequenciaUpdate):
 
             conn.commit()
 
-        return {"message": "Atualizado com sucesso!"}
+        return MessageResponse(message="Frequência atualizada com sucesso!")
 
     except HTTPException:
         raise
@@ -186,7 +178,7 @@ def update_frequencia(body: FrequenciaUpdate):
     except Exception as e:
         logger.error(f"Erro ao atualizar frequência: {e}")
         conn.rollback()
-        raise HTTPException(status_code=500, detail="Erro interno")
+        raise HTTPException(status_code=500, detail="Erro interno.")
 
     finally:
         conn.close()

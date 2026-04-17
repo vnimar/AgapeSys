@@ -3,12 +3,14 @@ from fastapi import APIRouter, HTTPException
 from ..bd.db import getConnection
 import psycopg2
 import psycopg2.extras
+from ..schemas.servo_schema import ServoListItem, ServoDetail
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/servos", tags=["Servos"])
 
-@router.get("/")
+
+@router.get("/", response_model=list[ServoListItem])
 def listar_servos():
     conn = None
 
@@ -16,7 +18,7 @@ def listar_servos():
         conn = getConnection()
 
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            query = """
+            cursor.execute("""
                 SELECT
                     s.id_servo AS id,
                     s.nome,
@@ -30,11 +32,10 @@ def listar_servos():
                 LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta
                 GROUP BY s.id_servo
                 ORDER BY s.nome
-            """
-            cursor.execute(query)
+            """)
             servos = cursor.fetchall()
 
-        return servos
+        return [ServoListItem(**dict(s)) for s in servos]
 
     except psycopg2.Error as e:
         logger.error(f"Erro ao listar servos: {e}")
@@ -45,7 +46,7 @@ def listar_servos():
             conn.close()
 
 
-@router.get("/{servo_id}")
+@router.get("/{servo_id}", response_model=ServoDetail)
 def get_servo_by_id(servo_id: int):
     conn = None
 
@@ -62,13 +63,13 @@ def get_servo_by_id(servo_id: int):
         if not servo:
             raise HTTPException(status_code=404, detail="Servo não encontrado.")
 
-        return {
-            "id": servo[0],
-            "nome": servo[1],
-            "telefone": servo[2],
-            "status": servo[3],
-            "anoIngresso": servo[4]
-        }
+        return ServoDetail(
+            id=servo[0],
+            nome=servo[1],
+            telefone=servo[2],
+            status=servo[3],
+            ano_ingresso=servo[4],
+        )
 
     except HTTPException:
         raise
