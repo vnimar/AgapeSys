@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class MissaoResponse(BaseModel):
     id_missao: int
     data: str
