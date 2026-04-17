@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+ import { Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -38,7 +38,7 @@ export default function TabLayout() {
         options={{
             title: 'Calendario',
             tabBarIcon: ({ color }) => (
-                <IconSymbol size={28} name="person.3.fill" color={color} />
+                <IconSymbol size={28} name="calendar" color={color} />
             ),
         }}
       />
@@ -47,8 +47,7 @@ export default function TabLayout() {
         options={{
             title: 'Frequencia',
             tabBarIcon: ({ color }) => (
-                // @ts-expect-error - mudar icon
-                <IconSymbol size={28} name="person.4.fill" color={color} />
+                <IconSymbol size={28} name="account-check-outline" color={color} />
             ),
         }}
       />
