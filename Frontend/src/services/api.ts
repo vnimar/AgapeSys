@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 //Url alterar para ip maquina ate subir vercel
-const BASE_URL = "http://192.168.1.160:8000";
-=======
-// TODO: trocar pelo IP correto ou URL de produção
-const BASE_URL = "http://192.168.0.7:8000";
->>>>>>> origin/main
+const BASE_URL = "http://192.168.68.100:8000";
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
