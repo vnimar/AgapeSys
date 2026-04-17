@@ -10,6 +10,7 @@ export const formatarDataBR = (dataString: string | undefined) => {
   return `${dia}/${mes}/${ano}`;
 };
 
+// @ts-ignore
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -109,5 +110,8 @@ export const styles = StyleSheet.create({
     width: 40,
     height: 40,
     resizeMode: 'contain',
+  },
+
+  description: {
   },
 });

@@ -10,7 +10,7 @@ interface Missao {
   descricao: string;
   local: string;
   horario: string;
-};
+}
 
 export default function CalendarioScreen() {
 

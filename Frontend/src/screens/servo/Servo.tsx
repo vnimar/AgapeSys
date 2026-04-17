@@ -32,10 +32,11 @@ export default function ServosScreen() {
     carregar();
   }, []);
 
-  function toggleExpand(id) {
+  function toggleExpand(id: React.SetStateAction<null>) {
     setExpandedId(expandedId === id ? null : id);
   }
 
+  // @ts-ignore
   function renderItem({ item }) {
     const isExpanded = expandedId === item.id;
 
