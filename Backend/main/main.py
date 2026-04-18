@@ -30,8 +30,8 @@ templates = Jinja2Templates(
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def home(request: Request):
     return templates.TemplateResponse(
-        "home.html",
-        {"request": request}
+        request=request,
+        name="home.html"
     )
 
 # Routers protegidos por API Key
