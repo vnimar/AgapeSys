@@ -1,5 +1,5 @@
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://agapesys.onrender.com";
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "7fee26675d2a9340b4122747cac56718";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "";
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
