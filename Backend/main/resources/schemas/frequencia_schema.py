@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
 
-
 class StatusFrequencia(str, Enum):
     presente = "Presente"
     falta = "Falta"
@@ -20,7 +19,6 @@ class FrequenciaUpdate(BaseModel):
     id_servo: int
     id_missao: int
     status: StatusFrequencia
-
 
 # ── Responses ─────────────────────────────────────────────────────────────────
 
@@ -47,3 +45,14 @@ class FrequenciaEmptyResponse(BaseModel):
     message: str
     data_missao: str
     descricao: str
+
+class FrequenciaServoResumo(BaseModel):
+    id_servo: int
+    nome: str
+    presente: int
+    justificada: int
+    falta: int
+
+class FrequenciaServosResponse(BaseModel):
+    message: str
+    data: list[FrequenciaServoResumo]

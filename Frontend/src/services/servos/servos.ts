@@ -5,6 +5,6 @@ export function getServos() {
   return apiRequest("/servos");
 }
 
-export function getServosById(id: number) {
-  return apiRequest(`/servos/${id}`);
+export function getServosById(id_servo: number) {
+  return apiRequest(`/servos/${id_servo}`);
 }

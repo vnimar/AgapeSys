@@ -9,12 +9,12 @@ from ..schemas.frequencia_schema import (
     FrequenciaResponse,
     FrequenciaEmptyResponse,
     MessageResponse,
+    FrequenciaServosResponse
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/frequencia", tags=["Frequência"])
-
 
 @router.post("/register", response_model=MessageResponse, status_code=201)
 def register_frequencia(body: FrequenciaCreate):
@@ -73,7 +73,7 @@ def register_frequencia(body: FrequenciaCreate):
         conn.close()
 
 
-@router.get("/{id_missao}", response_model=FrequenciaResponse | FrequenciaEmptyResponse)
+@router.get("/missao/{id_missao}", response_model=FrequenciaResponse | FrequenciaEmptyResponse)
 def get_frequencia(id_missao: int):
     conn = getConnection()
 
@@ -178,6 +178,47 @@ def update_frequencia(body: FrequenciaUpdate):
     except Exception as e:
         logger.error(f"Erro ao atualizar frequência: {e}")
         conn.rollback()
+        raise HTTPException(status_code=500, detail="Erro interno.")
+
+    finally:
+        conn.close()
+
+
+@router.get("/servos")
+def get_frequencia_by_servo():
+    conn = getConnection()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            cursor.execute("""
+                SELECT 
+                    s.id_servo,
+                    s.nome,
+                
+                    COUNT(CASE WHEN f.status = 'Presente' THEN 1 END) AS presente,
+                    COUNT(CASE WHEN f.status = 'Justificada' THEN 1 END) AS justificada,
+                    COUNT(CASE WHEN f.status = 'Falta' THEN 1 END) AS falta,
+                    
+                    ROUND(
+                        COUNT(*) FILTER (WHERE f.status IN ('Presente', 'Justificada')) * 100.0
+                        / NULLIF(COUNT(f.id_frequencia), 0),
+                        2
+                    ) AS percentual_presenca
+                
+                FROM servo s
+                LEFT JOIN frequencia f ON f.id_servo = s.id_servo
+                GROUP BY s.id_servo, s.nome
+                ORDER BY s.nome
+            """)
+
+            dados = cursor.fetchall()
+
+        return {
+            "message": "Resumo de frequência",
+            "data": dados
+        }
+
+    except Exception as e:
+        logger.error(f"Erro ao buscar resumo: {e}")
         raise HTTPException(status_code=500, detail="Erro interno.")
 
     finally:

@@ -23,18 +23,36 @@ export interface FrequenciaEmptyResponse {
   descricao: string;
 }
 
+export interface FrequenciaServoResumo {
+  id_servo: number;
+  nome: string;
+  presente: number;
+  justificada: number;
+  falta: number;
+  percentual_presenca: number | null;
+}
+
+export interface FrequenciaServosResponse {
+  message: string;
+  data: FrequenciaServoResumo[];
+}
+
 // ── Funções de serviço ────────────────────────────────────────────────────────
 
 export function getFrequenciaById(id_missao: number) {
   return apiRequest<FrequenciaResponse | FrequenciaEmptyResponse>(
-    `/frequencia/${id_missao}`
+    `/frequencia/missao/${id_missao}`
   );
+}
+
+export function getFrequenciaServos() {
+  return apiRequest<FrequenciaServosResponse>(`/frequencia/servos`);
 }
 
 export function postFrequencia(
   id_servo: number,
   id_missao: number,
-  status: StatusFrequencia  // obrigatório — banco não aceita NULL
+  status: StatusFrequencia
 ) {
   return apiRequest<{ message: string }>("/frequencia/register", {
     method: "POST",
