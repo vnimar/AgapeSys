@@ -1,11 +1,10 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# env
+.env
+
 # eas.json
-
 eas.json
-
-#api.ts
-src/services/api.ts
 
 # dependencies
 node_modules/
