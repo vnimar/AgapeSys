@@ -56,7 +56,7 @@ function ServoDetalhes({
             style={[
               styles.barraPreenchimento,
               {
-                width: `${percentual ?? 0}%` as any,
+                width: `${percentual ?? 0}%`,
                 backgroundColor: cor.bar,
               },
             ]}
@@ -95,7 +95,7 @@ function ServoDetalhes({
         <View style={styles.dadosRow}>
           <Text style={styles.dadosKey}>Ano de ingresso</Text>
           <Text style={styles.dadosValue}>
-           {servo.ano_ingresso && servo.ano_ingresso > 0 ? servo.ano_ingresso : "—"}
+            {servo.ano_ingresso && servo.ano_ingresso > 0 ? servo.ano_ingresso : "—"}
           </Text>
         </View>
 
@@ -128,33 +128,48 @@ export default function ServosScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function carregar() {
-      try {
-        // Busca servos e resumo de frequências em paralelo
-        const [servosData, freqData] = await Promise.all([
-          getServos(),
-          getFrequenciaServos(),
-        ]);
+  async function carregar() {
+    try {
+      const [servosData, freqData] = await Promise.all([
+        getServos(),
+        getFrequenciaServos(),
+      ]);
 
-        // @ts-ignore
-        setServos(Array.isArray(servosData) ? servosData : servosData?.data ?? []);
-
-        // Indexa frequências por id_servo para acesso O(1)
-        const freqMap: Record<number, FrequenciaServoResumo> = {};
-        freqData.data.forEach((f) => { freqMap[Number(f.id_servo)] = f; });
-        setFrequencias(freqMap);
-      } catch (error) {
-        console.error("Erro ao carregar servos:", error);
-      } finally {
-        setLoading(false);
+      // 👇 Normalização segura para servos (aceita array ou objeto com .data)
+      let servosArray: Servo[] = [];
+      if (Array.isArray(servosData)) {
+        servosArray = servosData;
+      } else if (servosData && typeof servosData === 'object' && 'data' in servosData && Array.isArray((servosData as any).data)) {
+        servosArray = (servosData as any).data;
       }
+      setServos(servosArray);
+
+      // 👇 Indexação segura das frequências
+      const freqMap: Record<number, FrequenciaServoResumo> = {};
+      const freqList = freqData && typeof freqData === 'object' && 'data' in freqData && Array.isArray((freqData as any).data)
+        ? (freqData as any).data
+        : Array.isArray(freqData) ? freqData : [];
+
+      freqList.forEach((f: any) => {
+        freqMap[Number(f.id_servo)] = f;
+      });
+      setFrequencias(freqMap);
+
+      // Log opcional (remova se não precisar)
+      console.log("IDs dos servos:", servosArray.map(s => s.id_servo));
+    } catch (error) {
+      console.error("Erro ao carregar servos:", error);
+    } finally {
+      setLoading(false);
     }
-    carregar();
-  }, []);
+  }
+  carregar();
+}, []);
 
   const toggleExpand = useCallback((id: number) => {
+    console.log(`Clicou no ID: ${id} | expandido atual: ${expandedId}`); // debug
     setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
+  }, [expandedId]);
 
   function getInitials(nome: string) {
     return nome
@@ -165,10 +180,10 @@ export default function ServosScreen() {
   }
 
   // ─── Render de cada card ──────────────────────────────────────────────────
-
   const renderItem = useCallback(
     ({ item }: { item: Servo }) => {
-      const isExpanded = expandedId === item.id_servo;
+      // 🔧 FIX: comparação com conversão para string evita problemas de tipo
+      const isExpanded = String(expandedId) === String(item.id_servo);
       const resumo = frequencias[item.id_servo] ?? null;
 
       return (
@@ -207,8 +222,6 @@ export default function ServosScreen() {
     [expandedId, toggleExpand, frequencias]
   );
 
-  // ─── Loading inicial ──────────────────────────────────────────────────────
-
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -217,8 +230,6 @@ export default function ServosScreen() {
       </View>
     );
   }
-
-  // ─── Render principal ─────────────────────────────────────────────────────
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -235,9 +246,7 @@ export default function ServosScreen() {
 
       <FlatList
         data={servos}
-        keyExtractor={(item, index) =>
-          item.id_servo ? item.id_servo.toString() : index.toString()
-        }
+        keyExtractor={(item) => `servo_${item.id_servo}`} // 🔧 chave única e estável
         renderItem={renderItem}
         extraData={{ expandedId, frequencias }}
         contentContainerStyle={styles.listContent}
