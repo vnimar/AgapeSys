@@ -1,6 +1,6 @@
 import { StyleSheet, Platform } from "react-native";
 
-// ─── Paleta de cores de frequência ───────────────────────────────────────────
+// ─── Cores por frequência ──────────────────────────────────────────────────
 
 export const FREQ_VERDE = {
   bg: "#EAF3DE",
@@ -23,32 +23,56 @@ export const FREQ_VERMELHO = {
   label: "Crítica",
 };
 
-export function getFreqColor(percentual: number) {
-  if (percentual >= 70) return FREQ_VERDE;
-  if (percentual >= 50) return FREQ_AMARELO;
-  return FREQ_VERMELHO;
-}
+// Função unificada (aceita null e limites 75/50)
+export const getFreqColor = (value: number | null) => {
+  if (value === null)
+    return { background: "#F3F4F6", text: "#9CA3AF", bar: "#D1D5DB" };
+  if (value >= 75)
+    return { background: "#EAF3DE", text: "#3B6D11", bar: "#5A9E1E" };
+  if (value >= 50)
+    return { background: "#FFF6E5", text: "#854F0B", bar: "#F59E0B" };
+  return { background: "#FCEBEB", text: "#A32D2D", bar: "#E24B4A" };
+};
 
-// ─── Estilos ──────────────────────────────────────────────────────────────────
+// ─── Estilos globais ──────────────────────────────────────────────────────
 
 export const styles = StyleSheet.create({
-
+  // Layout base
   safeArea: {
     flex: 1,
-    backgroundColor: "#F8F8F6",
+    backgroundColor: "#F8F9FB",
   },
 
-  // ── Header ──
+  centered: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F8F9FB",
+  },
+
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#888",
+  },
+
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+    paddingTop: 8,
+  },
+
+  // Header
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "android" ? 16 : 12,
     paddingBottom: 16,
+    backgroundColor: "#fff",
     borderBottomWidth: 0.5,
-    borderBottomColor: "#E5E5E5",
+    borderBottomColor: "#E5E7EB",
   },
 
   headerTexts: {
@@ -58,53 +82,76 @@ export const styles = StyleSheet.create({
   headerSub: {
     fontSize: 12,
     color: "#9CA3AF",
-    marginBottom: 2,
+    fontWeight: "500",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
 
   title: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#1E3A8A",
+    marginTop: 2,
   },
 
   logo: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     resizeMode: "contain",
     borderRadius: 10,
   },
 
-  // ── Lista ──
-  listContent: {
-    padding: 12,
-    paddingBottom: 32,
-  },
-
-  // ── Card ──
+  // Card
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 14,
     marginBottom: 10,
-    borderWidth: 0.5,
-    borderColor: "#E5E5E5",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
 
-  // ── Cabeçalho do card (linha clicável) ──
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
     paddingVertical: 12,
-    gap: 12,
   },
 
-  // Avatar de iniciais
+  cardInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+
+  cardNome: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0C447C",
+  },
+
+  cardPastas: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginTop: 2,
+  },
+
+  chevron: {
+    fontSize: 18,
+    color: "#9CA3AF",
+    marginLeft: 8,
+  },
+
+  // Avatar
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#E6F1FB",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#EFF6FF",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -112,87 +159,46 @@ export const styles = StyleSheet.create({
 
   avatarText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#0C447C",
+    fontWeight: "700",
+    color: "#1E3A8A",
   },
 
-  // Info central
-  cardInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-
-  cardNome: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#111827",
-  },
-
-  cardPastas: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 3,
-  },
-
-  // Badge de percentual (canto direito)
-  freqBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    alignItems: "center",
-    flexShrink: 0,
-  },
-
-  freqBadgeNum: {
-    fontSize: 16,
-    fontWeight: "500",
-    lineHeight: 18,
-  },
-
-  freqBadgeLabel: {
-    fontSize: 10,
-    marginTop: 1,
-  },
-
-  // Chevron de expandir
-  chevron: {
-    fontSize: 16,
-    color: "#9CA3AF",
-    marginLeft: 4,
-  },
-
-  // ── Detalhes expandidos ──
+  // Detalhes expandidos
   details: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
     borderTopWidth: 0.5,
-    borderTopColor: "#F0F0F0",
-    padding: 14,
+    borderTopColor: "#F3F4F6",
   },
 
-  // Barra de progresso
+  // Barra de frequência
   barraWrap: {
-    marginBottom: 14,
+    marginTop: 12,
+    marginBottom: 10,
   },
 
   barraRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 6,
   },
 
   barraLabel: {
     fontSize: 12,
     color: "#6B7280",
+    fontWeight: "500",
   },
 
   barraValor: {
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 13,
+    fontWeight: "700",
   },
 
   barraFundo: {
     height: 6,
-    borderRadius: 3,
     backgroundColor: "#F3F4F6",
+    borderRadius: 3,
     overflow: "hidden",
   },
 
@@ -201,28 +207,29 @@ export const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  // Mini contadores P / J / F
+  // Contadores P/J/F
   contadores: {
     flexDirection: "row",
-    gap: 6,
-    marginBottom: 14,
+    gap: 8,
+    marginBottom: 12,
   },
 
   contadorCard: {
     flex: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     paddingVertical: 8,
     alignItems: "center",
   },
 
   contadorNum: {
-    fontSize: 20,
-    fontWeight: "500",
+    fontSize: 18,
+    fontWeight: "700",
   },
 
   contadorLabel: {
     fontSize: 10,
     marginTop: 2,
+    fontWeight: "500",
   },
 
   // Dados do servo
@@ -230,16 +237,16 @@ export const styles = StyleSheet.create({
     backgroundColor: "#F9FAFB",
     borderRadius: 10,
     paddingHorizontal: 12,
-    overflow: "hidden",
+    paddingVertical: 4,
   },
 
   dadosRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 9,
+    paddingVertical: 10,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: "#E5E7EB",
   },
 
   dadosRowLast: {
@@ -253,34 +260,21 @@ export const styles = StyleSheet.create({
 
   dadosValue: {
     fontSize: 13,
+    color: "#1F2937",
     fontWeight: "500",
-    color: "#111827",
-    textAlign: "right",
     maxWidth: "60%",
+    textAlign: "right",
   },
 
-  // ── Loading / vazio ──
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F8F8F6",
-  },
-
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#9CA3AF",
-  },
-
-  // ── Loading inline (dentro do card expandido) ──
+  // Loading inline
   inlineLoading: {
+    flexDirection: "row",
     alignItems: "center",
     paddingVertical: 16,
+    gap: 8,
   },
 
   inlineLoadingText: {
-    marginTop: 8,
     fontSize: 13,
     color: "#9CA3AF",
   },
