@@ -22,6 +22,7 @@ export default function CalendarioScreen() {
     async function carregar(){
       try{
         const data = await getMissoes()
+        // @ts-ignore
         setMissoes(data)
       } catch(error){
          console.log(error)

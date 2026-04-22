@@ -22,6 +22,7 @@ const Home: React.FC = () => {
     async function carregar() {
       try {
         const resultado = await getProximaMissao();
+        // @ts-ignore
         setMissao(resultado);
       } catch (error) {
         console.error("Erro na requisição:", error);
