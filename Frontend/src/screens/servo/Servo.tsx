@@ -17,15 +17,15 @@ import {
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
+// 1. Atualizar interface
 interface Servo {
-  id_servo: number;
+  id: number;
   nome: string;
   telefone: string | null;
-  status: string | null;
-  ano_ingresso: number;
+  status: string | None;
+  ano_ingresso: number | null;
   pastas: string[];
 }
-
 // ─── Sub-componente: detalhes expandidos de um servo ─────────────────────────
 
 function ServoDetalhes({
@@ -167,14 +167,13 @@ export default function ServosScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Servo }) => {
-      const isExpanded = expandedId === item.id_servo;
-      const resumo = frequencias[item.id_servo] ?? null;
-
+      const isExpanded = expandedId === item.id;
+      const resumo = frequencias[item.id] ?? null;
       return (
         <View style={styles.card}>
           <TouchableOpacity
             style={styles.cardHeader}
-            onPress={() => toggleExpand(item.id_servo)}
+            onPress={() => toggleExpand(item.id)}
             activeOpacity={0.7}
           >
             <View style={styles.avatar}>
@@ -234,9 +233,8 @@ export default function ServosScreen() {
 
       <FlatList
         data={servos}
-        keyExtractor={(item, index) =>
-          item.id_servo ? item.id_servo.toString() : index.toString()
-        }
+        keyExtractor={(item) => item.id.toString()}
+        //onPress={() => toggleExpand(item.id ?? item.id_servo)}
         renderItem={renderItem}
         extraData={{ expandedId, frequencias }}
         contentContainerStyle={styles.listContent}

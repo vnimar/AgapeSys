@@ -1,5 +1,5 @@
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.0.7:8000";
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "cf2a986dfba1f3fe3961fc9e484b6b837e8151c1ed1039f7144d261d7dd880b7";
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
