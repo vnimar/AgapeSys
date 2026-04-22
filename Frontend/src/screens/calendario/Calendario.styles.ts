@@ -1,78 +1,205 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
-    padding: 20
+    backgroundColor: "#F8F9FA",
   },
-
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F9FA",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold"
-  },
-
-  logo: {
-    width: 40,
-    height: 40,
-    resizeMode: "contain"
-  },
-
-  list: {
-    paddingBottom: 20
-  },
-
-    card: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 8,
     backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E9ECEF",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1A2C3E",
+    letterSpacing: -0.5,
+  },
+  logo: {
+    width: 44,
+    height: 44,
+    resizeMode: "contain",
+    borderRadius: 22,
+  },
+  navigation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginTop: 20,
     marginBottom: 12,
-
-    borderWidth: 1,
-    borderColor: "#649AFA",
-
+  },
+  navButton: {
+    padding: 12,
+    borderRadius: 30,
+    backgroundColor: "#FFFFFF",
     shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-
-    elevation: 2,
+    shadowRadius: 2,
+    elevation: 1,
   },
-
-  data: {
-    fontSize: 18,
-    fontWeight: "bold"
+  navButtonText: {
+    fontSize: 20,
+    color: "#649AFA",
+    fontWeight: "600",
   },
-
-  details: {
-    marginTop: 10
+  monthTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1A2C3E",
+    textTransform: "capitalize",
   },
-
-  text: {
-    fontSize: 15,
-    marginBottom: 4,
-    color: '#555'
+  todayButton: {
+    alignSelf: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    backgroundColor: "#649AFA",
+    borderRadius: 30,
+    marginBottom: 16,
+    shadowColor: "#649AFA",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-
-  missao: {
+  todayButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  weekHeader: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  weekDay: {
+    width: 44,
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6C757D",
+  },
+  calendarGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+    paddingHorizontal: 8,
+  },
+  dayCell: {
+    width: "13%",
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 4,
+    borderRadius: 30,
+    backgroundColor: "transparent",
+  },
+  dayText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#212529",
+  },
+  otherMonthDay: {
+    backgroundColor: "transparent",
+  },
+  otherMonthText: {
+    color: "#ADB5BD",
+  },
+  selectedDay: {
+    backgroundColor: "#649AFA",
+  },
+  selectedDayText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+  todayCell: {
+    borderWidth: 2,
+    borderColor: "#649AFA",
+    backgroundColor: "#FFFFFF",
+  },
+  todayText: {
+    color: "#649AFA",
+    fontWeight: "700",
+  },
+  // ✨ NOVOS ESTILOS para dias com missão
+  missionDay: {
+    backgroundColor: "#E3F2FD",
+  },
+  missionDayText: {
+    color: "#1E88E5",
+    fontWeight: "600",
+  },
+  // ⚠️ Se você ainda tiver o missionDot, pode removê-lo ou comentar
+  // missionDot: { ... },
+  missionsSection: {
+    marginTop: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  missionsSectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginTop: 6
+    color: "#1A2C3E",
+    marginBottom: 12,
   },
-
-  info: {
-    marginTop: 6
-  }
-
+  missionsList: {
+    paddingBottom: 20,
+  },
+  missionCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+  },
+  missionDescription: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#212529",
+    marginBottom: 8,
+  },
+  missionDetailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+  },
+  missionDetail: {
+    fontSize: 14,
+    color: "#6C757D",
+    marginTop: 4,
+  },
+  emptyMissions: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 32,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E9ECEF",
+  },
+  emptyMissionsText: {
+    fontSize: 16,
+    color: "#ADB5BD",
+  },
 });
