@@ -1,5 +1,5 @@
 //Url alterar para ip maquina ate subir vercel
-const BASE_URL = "http://192.168.68.100:8000";
+const BASE_URL = "http://192.168.1.160:8000";
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
