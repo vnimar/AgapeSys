@@ -23,9 +23,9 @@ e acompanhar a presença dos servos nas missões da pastoral.
 ---
 ### ✦  Contribuidores 
 Feito com dedicação por:
-- _**[Igor Miranda]()**_
-- _**[Marcos Vinícius]()**_
-- _**[Paola Souza]()**_
+- _**[Igor Miranda](https://github.com/IgorMirand)**_
+- _**[Marcos Vinícius](https://github.com/vnimar)**_
+- _**[Paola Souza](https://github.com/paloulaa)**_
 
 ---
  
