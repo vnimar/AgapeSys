@@ -1,5 +1,5 @@
-//Url alterar para ip maquina ate subir vercel
-const BASE_URL = "http://192.168.1.160:8000";
+ const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "";
 
 export async function apiRequest<T = unknown>(
   endpoint: string,
@@ -8,13 +8,13 @@ export async function apiRequest<T = unknown>(
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
+      "X-API-Key": API_KEY,
       ...(options?.headers || {}),
     },
     ...options,
   });
 
   if (!response.ok) {
-    // Tenta extrair o detalhe de erro do backend (FastAPI retorna { detail: "..." })
     let detail = `Erro ${response.status}`;
     try {
       const errorBody = await response.json();

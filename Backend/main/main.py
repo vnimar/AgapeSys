@@ -1,13 +1,24 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from fastapi.templating import Jinja2Templates
-from resources.routers import missao_router, users_router, frequencia_router
+from resources.routers import missao_router, sevos_router, frequencia_router
+from resources.config.auth import verify_api_key
 
 app = FastAPI(
     title="AgapeSys Api",
     description="API backend do sistema AgapeSys",
     version="1.0.0"
+)
+
+# CORS — necessário para o Expo/React Native acessar a API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,10 +30,11 @@ templates = Jinja2Templates(
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def home(request: Request):
     return templates.TemplateResponse(
-        "home.html",
-        {"request": request}
+        request=request,
+        name="home.html"
     )
 
-app.include_router(users_router.router)
-app.include_router(missao_router.router)
-app.include_router(frequencia_router.router)
+# Routers protegidos por API Key
+app.include_router(sevos_router.router, dependencies=[Depends(verify_api_key)])
+app.include_router(missao_router.router, dependencies=[Depends(verify_api_key)])
+app.include_router(frequencia_router.router, dependencies=[Depends(verify_api_key)])

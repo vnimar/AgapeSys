@@ -19,20 +19,21 @@ def listar_servos():
 
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
             cursor.execute("""
-                SELECT
-                    s.id_servo AS id,
-                    s.nome,
-                    s.telefone,
-                    COALESCE(
-                        json_agg(p.nome) FILTER (WHERE p.nome IS NOT NULL),
-                        '[]'
-                    ) AS pastas
-                FROM servo s
-                LEFT JOIN servo_pasta sp ON sp.id_servo = s.id_servo
-                LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta
-                GROUP BY s.id_servo
-                ORDER BY s.nome
-            """)
+               SELECT s.id_servo AS id,
+                      s.nome,
+                      s.telefone,
+                      s.status,
+                      s.ano_ingresso,
+                      COALESCE(
+                              json_agg(p.nome) FILTER(WHERE p.nome IS NOT NULL),
+                              '[]'
+                      )          AS pastas
+               FROM servo s
+                        LEFT JOIN servo_pasta sp ON sp.id_servo = s.id_servo
+                        LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta
+               GROUP BY s.id_servo
+               ORDER BY s.nome
+           """)
             servos = cursor.fetchall()
 
         return [ServoListItem(**dict(s)) for s in servos]
