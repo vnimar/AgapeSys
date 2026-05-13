@@ -21,6 +21,7 @@ import {
   StatusFrequencia,
   FrequenciaResponse,
 } from "../../services/frequencia/frequencia";
+import Header, { styles as headerStyles} from '@/components/Header';
 
 // ── Tipos locais ──────────────────────────────────────────────────────────────
 
@@ -303,8 +304,9 @@ export default function FrequenciaScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Frequência</Text>
+      <Header showLogo={true}>
+        <Text style={headerStyles.title}>Frequência</Text>
+      </Header>
         <TouchableOpacity
           style={styles.missaoSelector}
           onPress={() => setModalMissoesVisible(true)}
@@ -328,7 +330,6 @@ export default function FrequenciaScreen() {
             <Text style={styles.badgeEdicaoText}>Modo edição — altere e confirme</Text>
           </View>
         )}
-      </View>
 
       {/* Conteúdo principal */}
       {!missaoSelecionada ? (

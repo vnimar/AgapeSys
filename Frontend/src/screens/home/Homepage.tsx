@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 
 import { formatarDataBR, styles } from './Home.styles';
 import { getProximaMissao } from '../../services/missao/missao';
+import Header, { styles as headerStyles} from '@/components/Header';
 
 interface Missao {
   id_missao: number;
@@ -37,22 +38,15 @@ const Home: React.FC = () => {
   // @ts-ignore
   // @ts-ignore
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
 
         {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>
-              Olá, <Text style={styles.username}>Servo !</Text>
+        <Header>
+            <Text style={headerStyles.title}>
+              Olá, <Text style={styles.username}>Servo!</Text>
             </Text>
-          </View>
-
-          <Image
-            source={require('../../assets/images/logoAgapeJovensDiscipuladoPSMA.png')}
-            style={styles.logoImage}
-          />
-        </View>
+        </Header>
 
         {/* Card Próxima Missão */}
         <View style={styles.card}>

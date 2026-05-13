@@ -11,17 +11,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F8F9FA",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E9ECEF",
-  },
+
   title: {
     fontSize: 28,
     fontWeight: "700",

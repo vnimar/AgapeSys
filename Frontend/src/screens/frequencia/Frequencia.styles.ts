@@ -17,16 +17,6 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-  // ── Header ──
-  header: {
-    backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 16 : 12,
-    paddingBottom: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#E0E0E0",
-  },
-
   headerTitle: {
     fontSize: 22,
     fontWeight: "600",
