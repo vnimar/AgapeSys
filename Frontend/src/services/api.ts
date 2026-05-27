@@ -20,7 +20,7 @@ export async function apiRequest<T = unknown>(
       const errorBody = await response.json();
       if (errorBody?.detail) detail = errorBody.detail;
     } catch {
-      // ignora se o corpo não for JSON
+
     }
     throw new Error(detail);
   }

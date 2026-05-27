@@ -9,10 +9,21 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://agapesys.onrender.com",
+        "EXPO_PUBLIC_API_KEY": "f54fd6c62a9831f5996a105dd1a7ffda"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://agapesys.onrender.com",
+        "EXPO_PUBLIC_API_KEY": "f54fd6c62a9831f5996a105dd1a7ffda"
+      }
     }
   },
   "submit": {
