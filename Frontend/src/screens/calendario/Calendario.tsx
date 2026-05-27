@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"; // ✅ import correto
 import { styles } from "./Calendario.styles";
 import { getMissoes } from "../../services/missao/missao";
+import Header, { styles as headerStyles} from '@/components/Header';
 
 interface Missao {
   id_missao: number;
@@ -163,13 +164,9 @@ export default function CalendarioScreen() {
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Cabeçalho */}
-        <View style={styles.header}>
-          <Text style={styles.title}>📅 Calendário</Text>
-          <Image
-            source={require("../../assets/images/logoAgapeJovensDiscipuladoPSMA.png")}
-            style={styles.logo}
-          />
-        </View>
+        <Header>
+          <Text style={headerStyles.title}>Calendário</Text>
+        </Header>
 
         {/* Navegação do mês */}
         <View style={styles.navigation}>

@@ -14,6 +14,7 @@ import {
   getFrequenciaServos,
   FrequenciaServoResumo,
 } from "../../services/frequencia/frequencia";
+import Header, { styles as headerStyles} from '@/components/Header';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -226,16 +227,11 @@ export default function ServosScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <View style={styles.header}>
+      <Header>
         <View style={styles.headerTexts}>
-          <Text style={styles.headerSub}>AgapeSys</Text>
-          <Text style={styles.title}>Servos</Text>
+          <Text style={headerStyles.title}>Servos</Text>
         </View>
-        <Image
-          source={require("../../assets/images/logoAgapeJovensDiscipuladoPSMA.png")}
-          style={styles.logo}
-        />
-      </View>
+      </Header>
 
       <FlatList
         data={servos}

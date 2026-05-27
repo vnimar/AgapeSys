@@ -2,20 +2,41 @@ import { StyleSheet } from 'react-native';
 
 export const formatarDataBR = (dataString: string | undefined) => {
   if (!dataString) return "Sem data";
-
-  // Divide a string "2026-02-27" em ["2026", "02", "27"]
   const [ano, mes, dia] = dataString.split('-');
-
-  // Retorna no formato brasileiro
   return `${dia}/${mes}/${ano}`;
 };
 
-// @ts-ignore
 export const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#F4F6F8',
+  },
+  container: {
     padding: 16,
+    paddingBottom: 32,
+  },
+
+  /* Header */
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  greeting: {
+    fontSize: 22,
+    color: '#1E3A8A',
+  },
+
+  username: {
+    fontWeight: 'bold',
+  },
+
+  logoImage: {
+    width: 44,
+    height: 44,
+    resizeMode: 'contain',
   },
 
   /* Card */
@@ -39,6 +60,8 @@ export const styles = StyleSheet.create({
     gap: 4,
   },
 
+  description: {},
+
   /* Grid */
   grid: {
     flexDirection: 'row',
@@ -58,9 +81,9 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  green: { backgroundColor: '#4CAF50' },
+  green:  { backgroundColor: '#4CAF50' },
   purple: { backgroundColor: '#7E57C2' },
-  blue: { backgroundColor: '#1976D2' },
+  blue:   { backgroundColor: '#1976D2' },
   orange: { backgroundColor: '#F57C00' },
 
   /* Atividades */
@@ -81,37 +104,5 @@ export const styles = StyleSheet.create({
   },
   time: {
     color: '#888',
-  },
-
-  /* Header */
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-
-  greeting: {
-    fontSize: 20,
-    color: '#1F2A44',
-  },
-
-  username: {
-    fontWeight: 'bold',
-  },
-
-  logo: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2E86DE',
-  },
-  
-  logoImage: {
-    width: 40,
-    height: 40,
-    resizeMode: 'contain',
-  },
-
-  description: {
   },
 });

@@ -62,19 +62,6 @@ export const styles = StyleSheet.create({
     paddingTop: 8,
   },
 
-  // Header
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 16 : 12,
-    paddingBottom: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#E5E7EB",
-  },
-
   headerTexts: {
     flexDirection: "column",
   },
