@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView } from "react-native-safe-area-context";
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {useRouter} from 'expo-router';
 
-import { formatarDataBR, styles } from './Home.styles';
-import { getProximaMissao } from '../../services/missao/missao';
-import Header, { styles as headerStyles} from '@/components/Header';
+import ScreenWrapper from '../../../components/ScreenWrapper';
+import {formatarDataBR, styles} from './Home.styles';
+import {getProximaMissao} from '../../services/missao/missao';
+import Header, { headerStyles } from '../../../components/Header';
 
 interface Missao {
   id_missao: number;
@@ -38,90 +38,76 @@ const Home: React.FC = () => {
   // @ts-ignore
   // @ts-ignore
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
+  <ScreenWrapper scrollable={true}>
+    <Header>
+      <Text style={headerStyles.title}>
+        Olá, <Text style={styles.username}>Servo!</Text>
+      </Text>
+    </Header>
 
-        {/* Header */}
-        <Header>
-            <Text style={headerStyles.title}>
-              Olá, <Text style={styles.username}>Servo!</Text>
+      {/* Card Próxima Missão */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Próxima Missão</Text>
+        {loading ? (
+          <ActivityIndicator size="small" />
+        ) : missao ? (
+          <>
+            <Text style={styles.cardDate}>
+              {formatarDataBR(missao.data)}
             </Text>
-        </Header>
-
-        {/* Card Próxima Missão */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Próxima Missão</Text>
-
-          {loading ? (
-            <ActivityIndicator size="small" />
-          ) : missao ? (
-            <>
-              <Text style={styles.cardDate}>
-                {formatarDataBR(missao.data)}
-              </Text>
-              <Text style={styles.description}>{missao.descricao}</Text>
-            </>
-          ) : (
-            <Text>Nenhuma missão encontrada</Text>
-          )}
-
-          <View style={styles.cardInfo}>
-            <Text>🕒 Início às 19:00</Text>
-            <Text>📍 Paroquia São Miguel Arcanjo</Text>
-          </View>
+            <Text style={styles.description}>{missao.descricao}</Text>
+          </>
+        ) : (
+          <Text>Nenhuma missão encontrada</Text>
+        )}
+        <View style={styles.cardInfo}>
+          <Text>🕒 Início às 19:00</Text>
+          <Text>📍 Paroquia São Miguel Arcanjo</Text>
         </View>
+      </View>
 
-        {/* Grid de Ações */}
-        <View style={styles.grid}>
+      {/* Grid de Ações */}
+      <View style={styles.grid}>
+        <TouchableOpacity
+          style={[styles.button, styles.green]}
+          onPress={() => router.push('/servo')}
+        >
+          <Text style={styles.buttonText}>Lista de Servos</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.purple]}
+          onPress={() => router.push('/calendario')}
+        >
+          <Text style={styles.buttonText}>Calendário</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.blue]}
+          onPress={() => router.push('/frequencia')}
+        >
+          <Text style={styles.buttonText}>Chamada</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.orange]}
+          onPress={() => console.log("Exportar")}
+        >
+          <Text style={styles.buttonText}>Exportar</Text>
+        </TouchableOpacity>
+      </View>
 
-          <TouchableOpacity
-            style={[styles.button, styles.green]}
-            onPress={() => router.push('/servo')}
-          >
-            <Text style={styles.buttonText}>Lista de Servos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.purple]}
-            onPress={() => router.push('/calendario')}
-          >
-            <Text style={styles.buttonText}>Calendário</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.blue]}
-            onPress={() => router.push('/frequencia')}
-          >
-            <Text style={styles.buttonText}>Chamada</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.orange]}
-            onPress={() => console.log("Exportar")}
-          >
-            <Text style={styles.buttonText}>Exportar</Text>
-          </TouchableOpacity>
-
+      {/* Últimas Atividades */}
+      <View style={styles.activityContainer}>
+        <Text style={styles.activityTitle}>Últimas Atividades</Text>
+        <View style={styles.activityItem}>
+          <Text>✔️ Chamada registrada</Text>
+          <Text style={styles.time}>20:15</Text>
         </View>
-
-        {/* Últimas Atividades */}
-        <View style={styles.activityContainer}>
-          <Text style={styles.activityTitle}>Últimas Atividades</Text>
-
-          <View style={styles.activityItem}>
-            <Text>✔️ Chamada registrada</Text>
-            <Text style={styles.time}>20:15</Text>
-          </View>
-
-          <View style={styles.activityItem}>
-            <Text>✔️ Chamada registrada</Text>
-            <Text style={styles.time}>10:25</Text>
-          </View>
+        <View style={styles.activityItem}>
+          <Text>✔️ Chamada registrada</Text>
+          <Text style={styles.time}>10:25</Text>
         </View>
-
-      </ScrollView>
-    </SafeAreaView>
-  );
+      </View>
+    </ScreenWrapper>
+);
 };
 
 export default Home;

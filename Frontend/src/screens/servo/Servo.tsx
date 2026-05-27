@@ -14,7 +14,7 @@ import {
   getFrequenciaServos,
   FrequenciaServoResumo,
 } from "../../services/frequencia/frequencia";
-import Header, { styles as headerStyles} from '@/components/Header';
+import Header, { headerStyles } from '../../../components/Header';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"; // ✅ import correto
 import { styles } from "./Calendario.styles";
 import { getMissoes } from "../../services/missao/missao";
-import Header, { styles as headerStyles} from '@/components/Header';
+import Header, { headerStyles } from '../../../components/Header';
 
 interface Missao {
   id_missao: number;

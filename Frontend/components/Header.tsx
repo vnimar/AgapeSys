@@ -1,49 +1,52 @@
 import React from 'react';
-import {View, Text, StyleSheet, Image} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, Image } from 'react-native';
 
 interface HeaderProps {
   children?: React.ReactNode;
+  title?: string;
   showLogo?: boolean;
-  //coloca os props aqui
 }
 
-export default function Header({children, showLogo = true }: HeaderProps) {
-  const insets = useSafeAreaInsets();
-
+export default function Header({ children, title, showLogo = true }: HeaderProps) {
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
-        {children}
-        {showLogo && (
-            <Image
-                source={require('../assets/images/logoAgapeJovensDiscipuladoPSMA.png')}
-                style={styles.logo}
-            />
-        )}
-      {/* Inclua aqui botões, ícones, etc. */}
+    <View style={headerStyles.container}>
+      <View style={headerStyles.leftSection}>
+        {children || <Text style={headerStyles.title}>{title || 'AgapeSys'}</Text>}
+      </View>
+      {showLogo && (
+        <Image
+          source={require('../assets/images/logoAgapeJovensDiscipuladoPSMA.png')}
+          style={headerStyles.logo}
+          resizeMode="contain"
+        />
+      )}
     </View>
   );
 }
 
-export const styles = StyleSheet.create({
+export const headerStyles = StyleSheet.create({
   container: {
-      flexDirection:  'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      backgroundColor: '#F4F6F8',
-      paddingVertical: 20,
-      paddingHorizontal: 20,
-      marginBottom: 20,
-      marginTop: -20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    paddingTop: 6,
+    paddingBottom: 15,
+    backgroundColor: '#F4F6F8',
   },
-    logo:  {
-        width: 46,
-        height: 46,
-        resizeMode: 'contain',
+  leftSection: {
+    flex: 1,
+    justifyContent: 'center',
   },
-    title: {
-      fontSize: 22,
-        color: '#1E3A8A',
-        fontWeight: 'bold',
-    }
+  title: {
+    fontSize: 20,
+    color: '#1E3A8A',
+    fontWeight: '600',
+  },
+  logo: {
+    width: 36,
+    height: 36,
+    marginLeft: 12,
+  },
 });
