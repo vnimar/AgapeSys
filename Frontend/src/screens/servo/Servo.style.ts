@@ -88,7 +88,283 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  // Card
+  // ─── NOVO: Barra de busca e filtro ──────────────────────────────────────
+  searchArea: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+  },
+
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    paddingHorizontal: 12,
+    height: 42,
+  },
+
+  searchIcon: {
+    fontSize: 15,
+    color: "#9CA3AF",
+    marginRight: 8,
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1F2937",
+    paddingVertical: 0,
+    includeFontPadding: false,
+  },
+
+  clearButton: {
+    paddingLeft: 4,
+  },
+
+  clearButtonText: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    fontWeight: "600",
+  },
+
+  filterButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  filterButtonActive: {
+    backgroundColor: "#1E3A8A",
+    borderColor: "#1E3A8A",
+  },
+
+  filterIconLines: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+  },
+
+  filterLine: {
+    width: 16,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#6B7280",
+  },
+
+  filterLineShort: {
+    width: 11,
+  },
+
+  filterLineShorter: {
+    width: 6,
+  },
+
+  filterLineActive: {
+    backgroundColor: "#FFFFFF",
+  },
+
+  badge: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#EF4444",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  badgeText: {
+    fontSize: 9,
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+
+  // Chips de filtros ativos
+  chipsContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+    gap: 6,
+  },
+
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+  },
+
+  chipLabel: {
+    fontSize: 12,
+    color: "#1E3A8A",
+    fontWeight: "500",
+    marginRight: 5,
+  },
+
+  chipClose: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#1E3A8A",
+  },
+
+  // Contador
+  counterWrap: {
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+
+  counterText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "500",
+  },
+
+  // ─── MODAL (bottom sheet) ───────────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 28,
+    maxHeight: "70%",
+  },
+
+  modalHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E5E7EB",
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#111827",
+  },
+
+  modalCloseButton: {
+    fontSize: 16,
+    color: "#6B7280",
+    padding: 4,
+  },
+
+  filterSectionTitle: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+
+  filterOptionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 20,
+  },
+
+  filterOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F9FAFB",
+  },
+
+  filterOptionActive: {
+    backgroundColor: "#1E3A8A",
+    borderColor: "#1E3A8A",
+  },
+
+  filterOptionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+
+  filterOptionText: {
+    fontSize: 13,
+    color: "#374151",
+    fontWeight: "500",
+  },
+
+  filterOptionTextActive: {
+    color: "#FFFFFF",
+  },
+
+  modalActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 8,
+  },
+
+  modalBtnClear: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+  },
+
+  modalBtnClearText: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "500",
+  },
+
+  modalBtnApply: {
+    flex: 2,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#1E3A8A",
+    alignItems: "center",
+  },
+
+  modalBtnApplyText: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+
+  // ─── Cards e detalhes ─────────────────────────────
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
@@ -133,7 +409,6 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-  // Avatar
   avatar: {
     width: 42,
     height: 42,
@@ -150,7 +425,6 @@ export const styles = StyleSheet.create({
     color: "#1E3A8A",
   },
 
-  // Detalhes expandidos
   details: {
     paddingHorizontal: 14,
     paddingBottom: 14,
@@ -158,7 +432,6 @@ export const styles = StyleSheet.create({
     borderTopColor: "#F3F4F6",
   },
 
-  // Barra de frequência
   barraWrap: {
     marginTop: 12,
     marginBottom: 10,
@@ -194,7 +467,6 @@ export const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  // Contadores P/J/F
   contadores: {
     flexDirection: "row",
     gap: 8,
@@ -219,7 +491,6 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Dados do servo
   dadosBox: {
     backgroundColor: "#F9FAFB",
     borderRadius: 10,
@@ -253,7 +524,6 @@ export const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  // Loading inline
   inlineLoading: {
     flexDirection: "row",
     alignItems: "center",
