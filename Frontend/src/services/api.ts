@@ -1,4 +1,4 @@
- const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY ?? "";
 
 export async function apiRequest<T = unknown>(

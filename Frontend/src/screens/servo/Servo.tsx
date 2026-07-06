@@ -9,7 +9,6 @@ import {
   TextInput,
   Modal,
   ScrollView,
-  Platform,
 } from "react-native";
 import { styles, getFreqColor } from "./Servo.style";
 import { getServos } from "../../services/servos/servos";
@@ -323,9 +322,9 @@ export default function ServosScreen() {
   const activeFilters = useMemo(() => {
     const chips: { key: string; label: string; onRemove: () => void }[] = [];
     const freqLabels: Record<string, string> = {
-      boa: "Boa ≥75%",
-      regular: "Regular 50–74%",
-      critica: "Crítica <50%",
+      boa: "Boa",
+      regular: "Regular",
+      critica: "Crítica",
     };
     if (filterFreq !== "todas") {
       chips.push({
@@ -485,15 +484,15 @@ export default function ServosScreen() {
           <View style={styles.filterOptionsRow}>
             {[
               { value: "todas", label: "Todas" },
-              { value: "boa", label: "Boa ≥75%", indicator: "#5A9E1E" },
+              { value: "boa", label: "Boa", indicator: "#5A9E1E" },
               {
                 value: "regular",
-                label: "Regular 50–74%",
+                label: "Regular",
                 indicator: "#F59E0B",
               },
               {
                 value: "critica",
-                label: "Crítica <50%",
+                label: "Crítica",
                 indicator: "#E24B4A",
               },
             ].map((opt) => (

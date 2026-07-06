@@ -85,6 +85,48 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
+  // ── Search bar (novo) ──────────────────────────────────────────────────────
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    borderWidth: 0.5,
+    borderColor: "#E0E0E0",
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 2,
+    paddingHorizontal: 12,
+    height: 42,
+    gap: 8,
+  },
+
+  searchIcon: {
+    fontSize: 15,
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1A1A1A",
+    paddingVertical: 0, // remove padding vertical padrão do Android
+  },
+
+  searchClear: {
+    fontSize: 13,
+    color: "#9CA3AF",
+    paddingLeft: 4,
+  },
+
+  searchCount: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginHorizontal: 16,
+    marginBottom: 4,
+    marginTop: 4,
+  },
+  // ─────────────────────────────────────────────────────────────────────────
+
   // ── Estado vazio ──
   emptyState: {
     flex: 1,
@@ -191,11 +233,11 @@ export const styles = StyleSheet.create({
     color: "#999",
   },
 
-  statusBtnText_Presente: { color: VERDE_DARK },
+  statusBtnText_Presente:    { color: VERDE_DARK },
   statusBtnText_Justificada: { color: AMARELO_DARK },
-  statusBtnText_Falta: { color: VERMELHO_DARK },
+  statusBtnText_Falta:       { color: VERMELHO_DARK },
 
-  // ── Footer e Botões (CORRIGIDOS) ──
+  // ── Footer e Botões ──
   footer: {
     backgroundColor: "#fff",
     borderTopWidth: 0.5,
@@ -218,34 +260,33 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  counterPresente: { backgroundColor: VERDE_LIGHT },
+  counterPresente:    { backgroundColor: VERDE_LIGHT },
   counterJustificada: { backgroundColor: AMARELO_LIGHT },
-  counterFalta: { backgroundColor: VERMELHO_LIGHT },
+  counterFalta:       { backgroundColor: VERMELHO_LIGHT },
 
   counterNum: {
     fontSize: 20,
     fontWeight: "600",
   },
 
-  counterNumPresente: { color: VERDE_DARK },
+  counterNumPresente:    { color: VERDE_DARK },
   counterNumJustificada: { color: AMARELO_DARK },
-  counterNumFalta: { color: VERMELHO_DARK },
+  counterNumFalta:       { color: VERMELHO_DARK },
 
   counterLabel: {
     fontSize: 11,
     marginTop: 2,
   },
 
-  counterLabelPresente: { color: VERDE_DARK },
+  counterLabelPresente:    { color: VERDE_DARK },
   counterLabelJustificada: { color: AMARELO_DARK },
-  counterLabelFalta: { color: VERMELHO_DARK },
+  counterLabelFalta:       { color: VERMELHO_DARK },
 
   actionButtons: {
     flexDirection: "row",
     gap: 10,
   },
 
-  // Botão Confirmar (verde)
   btnConfirmar: {
     backgroundColor: VERDE,
     borderRadius: 12,
@@ -262,7 +303,6 @@ export const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  // Botão Editar (cinza claro)
   btnAtualizar: {
     backgroundColor: "#F5F5F5",
     borderRadius: 12,
@@ -278,7 +318,6 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Botão Cancelar
   btnCancelar: {
     backgroundColor: "#F5F5F5",
     borderRadius: 12,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {useState, useEffect, useCallback, useRef, useMemo} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   View,
@@ -10,6 +10,7 @@ import {
   Modal,
   ScrollView,
   StatusBar,
+  TextInput,
 } from "react-native";
 import { styles } from "./Frequencia.styles";
 import { getMissoes } from "../../services/missao/missao";
@@ -23,7 +24,7 @@ import {
 } from "../../services/frequencia/frequencia";
 import Header, { headerStyles } from '../../../components/Header';
 
-// ── Tipos locais ──────────────────────────────────────────────────────────────
+// Tipos locais
 
 interface Missao {
   id_missao: number;
@@ -42,7 +43,10 @@ interface FrequenciaRegistro {
   status: StatusFrequencia;
 }
 
-// ── Componente ────────────────────────────────────────────────────────────────
+function normalize(str: string){
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+// Componente
 
 export default function FrequenciaScreen() {
   const [missoes, setMissoes] = useState<Missao[]>([]);
@@ -55,6 +59,13 @@ export default function FrequenciaScreen() {
   const [loadingServos, setLoadingServos] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [modalMissoesVisible, setModalMissoesVisible] = useState(false);
+  const [busca, setBusca] = useState("");
+
+  const servosFiltrados = useMemo(() => {
+    if (!busca.trim()) return servos;
+    const q = normalize(busca);
+    return servos.filter((s) => normalize(s.nome).includes(q));
+  }, [busca, servos]);
 
   const servosRef = useRef<ServoNormalizado[]>([]);
   servosRef.current = servos;
@@ -63,7 +74,7 @@ export default function FrequenciaScreen() {
     carregarDados();
   }, []);
 
-  // ── Carregamento inicial ────────────────────────────────────────────────────
+  // Carregamento inicial
 
   const carregarDados = async () => {
     setLoadingMissoes(true);
@@ -99,15 +110,14 @@ export default function FrequenciaScreen() {
     }
   };
 
-  // ── Selecionar missão e carregar frequência existente ───────────────────────
-
+  // Selecionar missão e carregar frequência existente
   const selecionarMissao = useCallback(async (missao: Missao) => {
     setMissaoSelecionada(missao);
     setModalMissoesVisible(false);
     setModoEdicao(false);
     setFrequenciaExistente([]);
+    setBusca("");
 
-    // Inicializa attendance zerado para todos os servos
     const initialAttendance: Record<number, StatusFrequencia | null> = {};
     servosRef.current.forEach((s) => { initialAttendance[s.id] = null; });
     setAttendance(initialAttendance);
@@ -115,7 +125,6 @@ export default function FrequenciaScreen() {
     try {
       const result = await getFrequenciaById(missao.id_missao);
 
-      // Se não tem dados (missão sem frequência), o array 'data' vem vazio ou ausente
       const registrosRaw = (result as FrequenciaResponse).data ?? [];
 
       if (registrosRaw.length === 0) {
@@ -123,7 +132,6 @@ export default function FrequenciaScreen() {
         return;
       }
 
-      // Mapeia status do backend (lowercase) para o formato do frontend
       const registros: FrequenciaRegistro[] = registrosRaw.map((item) => ({
         id_servo: item.id_servo,
         status: item.status,
@@ -135,7 +143,6 @@ export default function FrequenciaScreen() {
       registros.forEach((r) => { preenchido[r.id_servo] = r.status; });
       setAttendance(preenchido);
     } catch (err: any) {
-      // 404 significa que a missão existe mas não tem frequência — não é erro crítico
       if (err?.message?.includes("404") || err?.message?.toLowerCase().includes("não encontrada")) {
         setFrequenciaExistente([]);
         return;
@@ -145,13 +152,13 @@ export default function FrequenciaScreen() {
     }
   }, []);
 
-  // ── Marcar status de um servo ───────────────────────────────────────────────
+  // Marcar status de um servo
 
   const marcarStatus = useCallback((id: number, status: StatusFrequencia) => {
     setAttendance((prev) => ({ ...prev, [id]: status }));
   }, []);
 
-  // ── Confirmar frequência (POST — primeiro lançamento) ───────────────────────
+  // Confirmar frequência (POST)
 
   const confirmarFrequencia = async () => {
     if (!missaoSelecionada) return;
@@ -164,7 +171,6 @@ export default function FrequenciaScreen() {
 
     setSalvando(true);
     try {
-      // O backend recebe um registro por vez — enviamos em paralelo
       await Promise.all(
         servosRef.current.map((s) =>
           postFrequencia(s.id, missaoSelecionada.id_missao, attendance[s.id] as StatusFrequencia)
@@ -185,7 +191,7 @@ export default function FrequenciaScreen() {
     }
   };
 
-  // ── Salvar edição (PUT) ─────────────────────────────────────────────────────
+  // Salvar edição (PUT)
 
   const salvarEdicao = async () => {
     if (!missaoSelecionada) return;
@@ -198,7 +204,6 @@ export default function FrequenciaScreen() {
 
     setSalvando(true);
     try {
-      // Só atualiza os servos cujo status mudou em relação ao que veio do backend
       const alterados = servosRef.current.filter((s) => {
         const original = frequenciaExistente.find((f) => f.id_servo === s.id);
         return original?.status !== attendance[s.id];
@@ -212,7 +217,6 @@ export default function FrequenciaScreen() {
 
       Alert.alert("Sucesso", "Frequência atualizada!");
 
-      // Atualiza frequenciaExistente com os novos valores
       const atualizada: FrequenciaRegistro[] = servosRef.current.map((s) => ({
         id_servo: s.id,
         status: attendance[s.id] as StatusFrequencia,
@@ -226,7 +230,7 @@ export default function FrequenciaScreen() {
     }
   };
 
-  // ── Cancelar edição ─────────────────────────────────────────────────────────
+  // Cancelar edição
 
   const cancelarEdicao = useCallback(() => {
     setModoEdicao(false);
@@ -236,7 +240,7 @@ export default function FrequenciaScreen() {
     setAttendance(restaurado);
   }, [frequenciaExistente]);
 
-  // ── Helpers de UI ───────────────────────────────────────────────────────────
+  // Helpers de UI
 
   const formatarData = (dateStr: string) => {
     const [year, month, day] = dateStr.split("-");
@@ -255,7 +259,7 @@ export default function FrequenciaScreen() {
   const jaLancada = frequenciaExistente.length > 0;
   const podeEditar = !jaLancada || modoEdicao;
 
-  // ── Render de cada servo ────────────────────────────────────────────────────
+  // Render de cada servo
 
   const renderServos = ({ item }: { item: ServoNormalizado }) => {
     const statusAtual = attendance[item.id];
@@ -300,7 +304,7 @@ export default function FrequenciaScreen() {
     );
   };
 
-  // ── Render principal ────────────────────────────────────────────────────────
+  // Render principal
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -334,6 +338,36 @@ export default function FrequenciaScreen() {
           </View>
         )}
 
+      {/* Search Bar */}
+      {missaoSelecionada && !loadingServos && (
+        <View style={styles.searchContainer}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar servo..."
+            placeholderTextColor="#9CA3AF"
+            value={busca}
+            onChangeText={setBusca}
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+            returnKeyType="search"
+          />
+          {busca.length > 0 && (
+            <TouchableOpacity onPress={() => setBusca("")}
+                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Text style={styles.searchClear}>✕</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
+      {/* Contador de resultados da busca */}
+      {missaoSelecionada && busca.trim().length > 0 && (
+        <Text style={styles.searchCount}>
+          {servosFiltrados.length} de {servos.length} servos
+        </Text>
+      )}
+
       {/* Conteúdo principal */}
       {!missaoSelecionada ? (
         <View style={styles.emptyState}>
@@ -345,15 +379,22 @@ export default function FrequenciaScreen() {
         <View style={styles.emptyState}>
           <ActivityIndicator size="large" color="#1D9E75" />
         </View>
+      ) : servosFiltrados.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateIcon}>🔍</Text>
+          <Text style={styles.emptyStateText}>Nenhum servo encontrado</Text>
+          <Text style={styles.emptyStateSubtext}>Nome inexistente</Text>
+        </View>
       ) : (
         <FlatList
-          data={servos}
+          data={servosFiltrados}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderServos}
           extraData={attendance}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          keyboardShouldPersistTaps="handled"
         />
       )}
 
@@ -375,7 +416,6 @@ export default function FrequenciaScreen() {
             </View>
           </View>
 
-          {/* Primeiro lançamento */}
           {!jaLancada && (
             <TouchableOpacity
               style={[styles.btnConfirmar, salvando && styles.btnDisabled]}
@@ -391,7 +431,6 @@ export default function FrequenciaScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Botão Editar */}
           {jaLancada && !modoEdicao && (
             <TouchableOpacity
               style={styles.btnAtualizar}
@@ -402,7 +441,6 @@ export default function FrequenciaScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Modo edição: Cancelar + Salvar */}
           {jaLancada && modoEdicao && (
             <View style={styles.actionButtons}>
               <TouchableOpacity
