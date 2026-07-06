@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/servos", tags=["Servos"])
 
-
 @router.get("/", response_model=list[ServoListItem])
 def listar_servos():
     conn = None

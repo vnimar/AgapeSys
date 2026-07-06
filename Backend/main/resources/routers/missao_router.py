@@ -1,6 +1,6 @@
 import logging
 from fastapi import APIRouter, HTTPException
-from ..bd.db import getConnection
+from ..bd.db import get_connection
 import psycopg2.extras
 from datetime import date
 from ..config.missao_config import MISSAO_INFO
@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/missao", tags=["Missão"])
 
-
 def _enriquecer_missao(missao: dict) -> None:
     """Adiciona local e horário ao dict da missão a partir da config."""
     info = MISSAO_INFO.get(missao["descricao"], {})
@@ -19,15 +18,19 @@ def _enriquecer_missao(missao: dict) -> None:
     if isinstance(missao.get("data"), date):
         missao["data"] = missao["data"].isoformat()
 
+# ── GET / ─────────────────────────────────────────────────────────────────────
+#
+# Antes: getConnection() + finally conn.close() + print() para logar erro
+# Depois: with get_connection() + logger + HTTPException separada do except geral
 
 @router.get("/", response_model=list[MissaoResponse])
 def get_missao():
-    conn = getConnection()
 
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            cursor.execute("SELECT * FROM missao ORDER BY data ASC")
-            missoes = cursor.fetchall()
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute("SELECT * FROM missao ORDER BY data ASC")
+                missoes = cursor.fetchall()
 
         if not missoes:
             raise HTTPException(status_code=404, detail="Nenhuma missão encontrada.")
@@ -45,24 +48,25 @@ def get_missao():
         logger.error(f"Erro ao buscar missões: {e}")
         raise HTTPException(status_code=500, detail="Erro interno no servidor.")
 
-    finally:
-        conn.close()
-
+# ── GET /proxima ──────────────────────────────────────────────────────────────
+#
+# Rota estática — precisa vir ANTES de qualquer rota dinâmica com parâmetro
+# (não é o caso aqui, mas é boa prática manter a ordem)
 
 @router.get("/proxima", response_model=MissaoResponse)
 def get_proxima_missao():
-    conn = getConnection()
 
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-            cursor.execute("""
-                SELECT id_missao, data, descricao
-                FROM missao
-                WHERE data >= CURRENT_DATE
-                ORDER BY data ASC
-                LIMIT 1
-            """)
-            missao = cursor.fetchone()
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT id_missao, data, descricao
+                    FROM missao
+                    WHERE data >= CURRENT_DATE
+                    ORDER BY data ASC
+                    LIMIT 1
+                """)
+                missao = cursor.fetchone()
 
         if not missao:
             raise HTTPException(status_code=404, detail="Nenhuma missão futura encontrada.")
@@ -78,6 +82,41 @@ def get_proxima_missao():
     except Exception as e:
         logger.error(f"Erro ao buscar próxima missão: {e}")
         raise HTTPException(status_code=500, detail="Erro interno no servidor.")
+@router.get("/ultimas", response_model=list[MissaoResponse])
+def get_ultimas_missoes():
 
-    finally:
-        conn.close()
+    try:
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT
+                        id_missao,
+                        data,
+                        descricao
+                    FROM missao
+                    WHERE data <= CURRENT_DATE
+                    ORDER BY data DESC
+                    LIMIT 3
+                """)
+
+                missoes = cursor.fetchall()
+
+        if not missoes:
+            raise HTTPException(
+                status_code=404,
+                detail="Nenhuma missão encontrada."
+            )
+
+        missoes = [dict(m) for m in missoes]
+
+        for missao in missoes:
+            _enriquecer_missao(missao)
+
+        return missoes
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.error(f"Erro ao buscar últimas missões: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno no servidor.")

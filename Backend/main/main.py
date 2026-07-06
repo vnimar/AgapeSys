@@ -1,9 +1,12 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from fastapi.templating import Jinja2Templates
-from resources.routers import missao_router, sevos_router, frequencia_router
+from resources.routers import missao_router, servos_router, frequencia_router
 from resources.config.auth import verify_api_key
 
 app = FastAPI(
@@ -29,12 +32,9 @@ templates = Jinja2Templates(
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def home(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="home.html"
-    )
+    return templates.TemplateResponse(request=request, name="home.html")
 
 # Routers protegidos por API Key
-app.include_router(sevos_router.router, dependencies=[Depends(verify_api_key)])
+app.include_router(servos_router.router, dependencies=[Depends(verify_api_key)])
 app.include_router(missao_router.router, dependencies=[Depends(verify_api_key)])
 app.include_router(frequencia_router.router, dependencies=[Depends(verify_api_key)])

@@ -7,5 +7,9 @@ export function getProximaMissao(){
     }
 
 export function getMissoes() {
-  return apiRequest("/missao");
-}
+    return apiRequest("/missao");
+    }
+
+export async function getUltimasMissoes() {
+    return apiRequest("/missao/ultimas");
+    }

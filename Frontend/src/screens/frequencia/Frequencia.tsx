@@ -119,7 +119,7 @@ export default function FrequenciaScreen() {
     setBusca("");
 
     const initialAttendance: Record<number, StatusFrequencia | null> = {};
-    servosRef.current.forEach((s) => { initialAttendance[s.id] = null; });
+    servosRef.current.forEach((s) => { initialAttendance[s.id] = "Falta"; });
     setAttendance(initialAttendance);
 
     try {

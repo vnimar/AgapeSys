@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
+from typing import Optional
 
 class StatusFrequencia(str, Enum):
     presente = "Presente"
@@ -52,6 +53,7 @@ class FrequenciaServoResumo(BaseModel):
     presente: int
     justificada: int
     falta: int
+    percentual_presenca: Optional[float] = None
 
 class FrequenciaServosResponse(BaseModel):
     message: str

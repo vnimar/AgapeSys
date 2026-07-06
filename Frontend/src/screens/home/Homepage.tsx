@@ -4,7 +4,7 @@ import {useRouter} from 'expo-router';
 
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import {formatarDataBR, styles} from './Home.styles';
-import {getProximaMissao} from '../../services/missao/missao';
+import {getProximaMissao, getUltimasMissoes} from '../../services/missao/missao';
 import Header, { headerStyles } from '../../../components/Header';
 
 interface Missao {
@@ -18,20 +18,26 @@ const Home: React.FC = () => {
 
   const [missao, setMissao] = useState<Missao | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ultimasMissoes, setUltimasMissoes] = useState<Missao[]>([]);
 
   useEffect(() => {
-    async function carregar() {
-      try {
-        const resultado = await getProximaMissao();
-        // @ts-ignore
-        setMissao(resultado);
-      } catch (error) {
-        console.error("Erro na requisição:", error);
-      } finally {
-        setLoading(false);
-      }
+  async function carregar() {
+    try {
+      const [proxima, ultimas] = await Promise.all([
+        getProximaMissao(),
+        getUltimasMissoes(),
+      ]);
+
+      // @ts-ignore
+      setMissao(proxima);
+      setUltimasMissoes(ultimas);
+
+    } catch (error) {
+      console.error("Erro na requisição:", error);
+    } finally {
+      setLoading(false);
     }
-    carregar();
+  }carregar();
   }, []);
 
   // @ts-ignore
@@ -65,7 +71,6 @@ const Home: React.FC = () => {
           <Text>📍 Paroquia São Miguel Arcanjo</Text>
         </View>
       </View>
-
       {/* Grid de Ações */}
       <View style={styles.grid}>
         <TouchableOpacity
@@ -96,15 +101,20 @@ const Home: React.FC = () => {
 
       {/* Últimas Atividades */}
       <View style={styles.activityContainer}>
-        <Text style={styles.activityTitle}>Últimas Atividades</Text>
-        <View style={styles.activityItem}>
-          <Text>✔️ Chamada registrada</Text>
-          <Text style={styles.time}>20:15</Text>
-        </View>
-        <View style={styles.activityItem}>
-          <Text>✔️ Chamada registrada</Text>
-          <Text style={styles.time}>10:25</Text>
-        </View>
+        <Text style={styles.activityTitle}>Últimas Missões</Text>
+
+        {ultimasMissoes.map((missao) => (
+          <View
+            key={missao.id_missao}
+            style={styles.activityItem}>
+            <View>
+              <Text>📅 {missao.descricao}</Text>
+              <Text style={styles.time}>
+                {formatarDataBR(missao.data)}
+              </Text>
+            </View>
+          </View>
+        ))}
       </View>
     </ScreenWrapper>
 );
