@@ -7,8 +7,3 @@
 __pycache__
 
 *.pyc
-
-Backend/main/resources/config/security.py
-Backend/main/resources/routers/auth_router.py
-Backend/main/resources/routers/servos_router.py
-Backend/main/resources/schemas/auth_schema.py
