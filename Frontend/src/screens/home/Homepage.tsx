@@ -30,6 +30,7 @@ const Home: React.FC = () => {
 
       // @ts-ignore
       setMissao(proxima);
+      // @ts-ignore
       setUltimasMissoes(ultimas);
 
     } catch (error) {
