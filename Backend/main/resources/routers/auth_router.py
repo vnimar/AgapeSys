@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
 # ── POST /auth/login ──────────────────────────────────────────────────────────
 #
 # Fluxo:
@@ -82,7 +81,6 @@ def me(usuario: UsuarioLogado = Depends(get_current_user)):
 #
 # Cria um novo usuário — restrito a admins.
 # A senha é transformada em hash ANTES de salvar no banco.
-# Nunca salve senha em texto puro.
 
 @router.post("/register", response_model=UsuarioLogado, status_code=201)
 def register(

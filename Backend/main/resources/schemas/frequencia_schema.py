@@ -26,7 +26,6 @@ class FrequenciaUpdate(BaseModel):
 class MessageResponse(BaseModel):
     message: str
 
-
 class FrequenciaItem(BaseModel):
     id_servo: int
     nome: str
@@ -58,3 +57,12 @@ class FrequenciaServoResumo(BaseModel):
 class FrequenciaServosResponse(BaseModel):
     message: str
     data: list[FrequenciaServoResumo]
+
+class MissaoComFrequencia(BaseModel):
+    id_missao: int
+    data: str
+    descricao: Optional[str] = None
+    tem_frequencia: bool
+
+class MissoesComFrequenciaResponse(BaseModel):
+    data: list[MissaoComFrequencia]

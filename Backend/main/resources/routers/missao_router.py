@@ -18,11 +18,6 @@ def _enriquecer_missao(missao: dict) -> None:
     if isinstance(missao.get("data"), date):
         missao["data"] = missao["data"].isoformat()
 
-# ── GET / ─────────────────────────────────────────────────────────────────────
-#
-# Antes: getConnection() + finally conn.close() + print() para logar erro
-# Depois: with get_connection() + logger + HTTPException separada do except geral
-
 @router.get("/", response_model=list[MissaoResponse])
 def get_missao():
 
@@ -47,11 +42,6 @@ def get_missao():
     except Exception as e:
         logger.error(f"Erro ao buscar missões: {e}")
         raise HTTPException(status_code=500, detail="Erro interno no servidor.")
-
-# ── GET /proxima ──────────────────────────────────────────────────────────────
-#
-# Rota estática — precisa vir ANTES de qualquer rota dinâmica com parâmetro
-# (não é o caso aqui, mas é boa prática manter a ordem)
 
 @router.get("/proxima", response_model=MissaoResponse)
 def get_proxima_missao():
@@ -82,6 +72,7 @@ def get_proxima_missao():
     except Exception as e:
         logger.error(f"Erro ao buscar próxima missão: {e}")
         raise HTTPException(status_code=500, detail="Erro interno no servidor.")
+
 @router.get("/ultimas", response_model=list[MissaoResponse])
 def get_ultimas_missoes():
 
