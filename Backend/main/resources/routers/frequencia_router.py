@@ -10,17 +10,13 @@ from ..schemas.frequencia_schema import (
     FrequenciaEmptyResponse,
     MessageResponse,
     FrequenciaServosResponse,
+    MissoesComFrequenciaResponse,
+    MissaoComFrequencia,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/frequencia", tags=["Frequência"])
-
-
-# ── POST /register ────────────────────────────────────────────────────────────
-#
-# Antes: getConnection() + try/except/finally com commit, rollback e close
-# Depois: with get_connection() — o context manager faz tudo automaticamente
 
 @router.post("/register", response_model=MessageResponse, status_code=201)
 def register_frequencia(body: FrequenciaCreate):
@@ -72,13 +68,6 @@ def register_frequencia(body: FrequenciaCreate):
 
     return MessageResponse(message="Frequência registrada com sucesso!")
 
-
-# ── GET /servos ───────────────────────────────────────────────────────────────
-#
-# IMPORTANTE: rota estática ANTES da dinâmica /{id_missao}
-# O FastAPI lê as rotas de cima para baixo — se /{id_missao} viesse primeiro,
-# ele tentaria converter "servos" para int e daria erro.
-
 @router.get("/servos", response_model=FrequenciaServosResponse)
 def get_frequencia_by_servo():
 
@@ -109,10 +98,31 @@ def get_frequencia_by_servo():
 
     return FrequenciaServosResponse(message="Resumo de frequência", data=dados)
 
+@router.get("/missoes", response_model=MissoesComFrequenciaResponse)
+def get_missoes_com_frequencia():
+    try:
+        with get_connection() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute("""
+                    SELECT
+                        m.id_missao,
+                        m.data::text,
+                        m.descricao,
+                        EXISTS (
+                            SELECT 1 FROM frequencia f
+                            WHERE f.id_missao = m.id_missao
+                        ) AS tem_frequencia
+                    FROM missao m
+                    ORDER BY
+                        CASE WHEN m.data >= CURRENT_DATE THEN 0 ELSE 1 END ASC,
+                        CASE WHEN m.data >= CURRENT_DATE THEN m.data END ASC,
+                        CASE WHEN m.data < CURRENT_DATE THEN m.data END DESC
+                """)
+                return MissoesComFrequenciaResponse(data=cursor.fetchall())
 
-# ── GET /missao/{id_missao} ───────────────────────────────────────────────────
-#
-# Rota dinâmica DEPOIS da estática /servos — ordem importa!
+    except Exception as e:
+        logger.error(f"Erro ao buscar missões com frequência: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno.")
 
 @router.get("/missao/{id_missao}", response_model=FrequenciaResponse | FrequenciaEmptyResponse)
 def get_frequencia(id_missao: int):
@@ -167,9 +177,6 @@ def get_frequencia(id_missao: int):
         descricao=missao["descricao"],
         data=[dict(d) for d in dados],
     )
-
-
-# ── PUT /update ───────────────────────────────────────────────────────────────
 
 @router.put("/update", response_model=MessageResponse)
 def update_frequencia(body: FrequenciaUpdate):

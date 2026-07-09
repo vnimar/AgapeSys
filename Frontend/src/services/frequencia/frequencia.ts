@@ -38,6 +38,13 @@ export interface FrequenciaServosResponse {
   data: FrequenciaServoResumo[];
 }
 
+export interface MissaoComFrequencia {
+  id_missao: number;
+  data: string;
+  descricao: string | null;
+  tem_frequencia: boolean;
+}
+
 // ── Funções de serviço ────────────────────────────────────────────────────────
 
 export function getFrequenciaById(id_missao: number) {
@@ -48,6 +55,10 @@ export function getFrequenciaById(id_missao: number) {
 
 export function getFrequenciaServos() {
   return apiRequest<FrequenciaServosResponse>(`/frequencia/servos`);
+}
+
+export function getMissoesComFrequencia(){
+  return apiRequest<{data: MissaoComFrequencia[]}>("/frequencia/missoes")
 }
 
 export function postFrequencia(
@@ -71,3 +82,4 @@ export function putFrequencia(
     body: JSON.stringify({ id_servo, id_missao, status }),
   });
 }
+

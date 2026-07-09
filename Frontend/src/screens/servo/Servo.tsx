@@ -336,7 +336,7 @@ export default function ServosScreen() {
     if (filterStatus !== "todos") {
       chips.push({
         key: "status",
-        label: filterStatus === "ativo" ? "Ativo" : "Inativo",
+        label: filterStatus === "Ativo" ? "Ativo" : "Inativo",
         onRemove: () => setFilterStatus("todos"),
       });
     }
@@ -530,8 +530,8 @@ export default function ServosScreen() {
           <View style={styles.filterOptionsRow}>
             {[
               { value: "todos", label: "Todos" },
-              { value: "ativo", label: "Ativo" },
-              { value: "inativo", label: "Inativo" },
+              { value: "Ativo", label: "Ativo" },
+              { value: "Inativo", label: "Inativo" },
             ].map((opt) => (
               <TouchableOpacity
                 key={opt.value}

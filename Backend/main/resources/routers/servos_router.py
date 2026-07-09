@@ -26,7 +26,7 @@ def listar_servos():
                       COALESCE(
                               json_agg(p.nome) FILTER(WHERE p.nome IS NOT NULL),
                               '[]'
-                      )          AS pastas
+                      ) AS pastas
                FROM servo s
                         LEFT JOIN servo_pasta sp ON sp.id_servo = s.id_servo
                         LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta

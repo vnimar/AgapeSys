@@ -19,8 +19,10 @@ import {
   getFrequenciaById,
   postFrequencia,
   putFrequencia,
+  getMissoesComFrequencia,
   StatusFrequencia,
   FrequenciaResponse,
+  MissaoComFrequencia
 } from "../../services/frequencia/frequencia";
 import Header, { headerStyles } from '../../../components/Header';
 
@@ -30,6 +32,7 @@ interface Missao {
   id_missao: number;
   data: string;
   descricao: string | null;
+  tem_frequencia: boolean;
 }
 
 interface ServoNormalizado {
@@ -49,7 +52,7 @@ function normalize(str: string){
 // Componente
 
 export default function FrequenciaScreen() {
-  const [missoes, setMissoes] = useState<Missao[]>([]);
+  const [missoes, setMissoes] = useState<MissaoComFrequencia[]>([]);
   const [missaoSelecionada, setMissaoSelecionada] = useState<Missao | null>(null);
   const [servos, setServos] = useState<ServoNormalizado[]>([]);
   const [attendance, setAttendance] = useState<Record<number, StatusFrequencia | null>>({});
@@ -80,15 +83,8 @@ export default function FrequenciaScreen() {
     setLoadingMissoes(true);
     setLoadingServos(true);
     try {
-      const [missoesData, servosData] = await Promise.all([getMissoes(), getServos()]);
-
-      // @ts-ignore
-      missoesData.sort(
-        (a: Missao, b: Missao) =>
-          new Date(a.data).getTime() - new Date(b.data).getTime()
-      );
-      // @ts-ignore
-      setMissoes(missoesData);
+      const [missoesData, servosData] = await Promise.all([getMissoesComFrequencia(), getServos()]);
+      setMissoes(missoesData.data)
 
       // @ts-ignore
       const servosRaw = Array.isArray(servosData) ? servosData : servosData?.data || [];
