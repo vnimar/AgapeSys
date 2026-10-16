@@ -25,24 +25,17 @@ def register_frequencia(body: FrequenciaCreate):
         with get_connection() as conn:
             with conn.cursor() as cursor:
 
-                # 1. Buscar data da missão
+                # 1. Verificar se a missão existe
+                # A chamada pode ser feita antes ou depois da data da missão
                 cursor.execute(
-                    "SELECT data FROM missao WHERE id_missao = %s",
+                    "SELECT 1 FROM missao WHERE id_missao = %s",
                     (body.id_missao,)
                 )
-                missao = cursor.fetchone()
 
-                if not missao:
+                if not cursor.fetchone():
                     raise HTTPException(status_code=404, detail="Missão não encontrada.")
 
-                # 2. Bloquear se ainda não aconteceu
-                if missao[0] > date.today():
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Não é possível registrar frequência antes da missão acontecer."
-                    )
-
-                # 3. Verificar duplicidade
+                # 2. Verificar duplicidade
                 cursor.execute("""
                     SELECT id_frequencia FROM frequencia
                     WHERE id_servo = %s AND id_missao = %s
@@ -51,7 +44,7 @@ def register_frequencia(body: FrequenciaCreate):
                 if cursor.fetchone():
                     raise HTTPException(status_code=409, detail="Registro já existe. Use edição.")
 
-                # 4. Inserir
+                # 3. Inserir
                 # Não precisa de conn.commit() — o context manager commita automaticamente
                 cursor.execute("""
                     INSERT INTO frequencia (id_servo, id_missao, status, data)
@@ -186,19 +179,12 @@ def update_frequencia(body: FrequenciaUpdate):
             with conn.cursor() as cursor:
 
                 cursor.execute(
-                    "SELECT data FROM missao WHERE id_missao = %s",
+                    "SELECT 1 FROM missao WHERE id_missao = %s",
                     (body.id_missao,)
                 )
-                missao = cursor.fetchone()
 
-                if not missao:
+                if not cursor.fetchone():
                     raise HTTPException(status_code=404, detail="Missão não encontrada.")
-
-                if missao[0] > date.today():
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Não é possível editar antes da missão acontecer."
-                    )
 
                 cursor.execute("""
                     UPDATE frequencia
@@ -206,8 +192,12 @@ def update_frequencia(body: FrequenciaUpdate):
                     WHERE id_servo = %s AND id_missao = %s
                 """, (body.status, body.id_servo, body.id_missao))
 
+                # Servo sem registro nessa missão (ex.: cadastrado depois da chamada)
                 if cursor.rowcount == 0:
-                    raise HTTPException(status_code=404, detail="Registro não encontrado.")
+                    cursor.execute("""
+                        INSERT INTO frequencia (id_servo, id_missao, status, data)
+                        VALUES (%s, %s, %s, %s)
+                    """, (body.id_servo, body.id_missao, body.status, date.today()))
 
     except HTTPException:
         raise
