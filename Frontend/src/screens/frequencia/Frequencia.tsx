@@ -11,6 +11,8 @@ import {
   ScrollView,
   StatusBar,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { styles } from "./Frequencia.styles";
 import { getMissoes } from "../../services/missao/missao";
@@ -49,6 +51,11 @@ interface FrequenciaRegistro {
 function normalize(str: string){
   return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
+
+function formatarData(dateStr: string) {
+  const [year, month, day] = dateStr.split("-");
+  return `${day}/${month}/${year}`;
+}
 // Componente
 
 export default function FrequenciaScreen() {
@@ -63,12 +70,27 @@ export default function FrequenciaScreen() {
   const [salvando, setSalvando] = useState(false);
   const [modalMissoesVisible, setModalMissoesVisible] = useState(false);
   const [busca, setBusca] = useState("");
+  const [buscaMissao, setBuscaMissao] = useState("");
 
   const servosFiltrados = useMemo(() => {
     if (!busca.trim()) return servos;
     const q = normalize(busca);
     return servos.filter((s) => normalize(s.nome).includes(q));
   }, [busca, servos]);
+
+  // Filtra mantendo a ordem da API (próximas primeiro, depois as passadas)
+  const missoesFiltradas = useMemo(() => {
+    if (!buscaMissao.trim()) return missoes;
+    const q = normalize(buscaMissao.trim());
+    return missoes.filter((m) =>
+      normalize(`${formatarData(m.data)} ${m.descricao ?? ""}`).includes(q)
+    );
+  }, [buscaMissao, missoes]);
+
+  const abrirModalMissoes = () => {
+    setBuscaMissao("");
+    setModalMissoesVisible(true);
+  };
 
   const servosRef = useRef<ServoNormalizado[]>([]);
   servosRef.current = servos;
@@ -238,11 +260,6 @@ export default function FrequenciaScreen() {
 
   // Helpers de UI
 
-  const formatarData = (dateStr: string) => {
-    const [year, month, day] = dateStr.split("-");
-    return `${day}/${month}/${year}`;
-  };
-
   const getInitials = (nome: string) =>
     nome.split(" ").slice(0, 2).map((n) => n[0].toUpperCase()).join("");
 
@@ -312,7 +329,7 @@ export default function FrequenciaScreen() {
       </Header>
         <TouchableOpacity
           style={styles.missaoSelector}
-          onPress={() => setModalMissoesVisible(true)}
+          onPress={abrirModalMissoes}
         >
           <Text style={styles.missaoSelectorLabel}>Missão</Text>
           <Text style={styles.missaoSelectorValue} numberOfLines={1}>
@@ -471,6 +488,10 @@ export default function FrequenciaScreen() {
         animationType="slide"
         onRequestClose={() => setModalMissoesVisible(false)}
       >
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
@@ -479,11 +500,31 @@ export default function FrequenciaScreen() {
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Selecione a missão</Text>
+            <View style={[styles.searchContainer, styles.searchContainerModal]}>
+              <Text style={styles.searchIcon}>🔍</Text>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Buscar por data ou descrição..."
+                placeholderTextColor="#9CA3AF"
+                value={buscaMissao}
+                onChangeText={setBuscaMissao}
+                autoCorrect={false}
+                returnKeyType="search"
+              />
+              {buscaMissao.length > 0 && (
+                <TouchableOpacity onPress={() => setBuscaMissao("")}
+                                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Text style={styles.searchClear}>✕</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {loadingMissoes ? (
               <ActivityIndicator color="#1D9E75" style={{ marginTop: 24 }} />
+            ) : missoesFiltradas.length === 0 ? (
+              <Text style={styles.missaoEmpty}>Nenhuma missão encontrada</Text>
             ) : (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {missoes.map((m) => (
+              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {missoesFiltradas.map((m) => (
                   <TouchableOpacity
                     key={m.id_missao}
                     style={[
@@ -507,6 +548,7 @@ export default function FrequenciaScreen() {
             )}
           </View>
         </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );

@@ -101,6 +101,12 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
 
+  searchContainerModal: {
+    marginHorizontal: 0,
+    marginTop: 0,
+    marginBottom: 8,
+  },
+
   searchIcon: {
     fontSize: 15,
   },
@@ -395,6 +401,13 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: "#888",
     marginTop: 2,
+  },
+
+  missaoEmpty: {
+    fontSize: 14,
+    color: "#AAA",
+    textAlign: "center",
+    paddingVertical: 24,
   },
 
   missaoItemCheck: {
