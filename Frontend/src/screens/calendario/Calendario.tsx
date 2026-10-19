@@ -1,29 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
-  Image,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context"; // ✅ import correto
 import { styles } from "./Calendario.styles";
-import { getMissoes } from "../../services/missao/missao";
+import { getMissoes, Missao } from "../../services/missao/missao";
+import { getAdminPin, sairModoEdicao } from "../../services/admin/admin";
+import { PinModal, MissaoEditModal } from "./CalendarioAdmin";
 import Header, { headerStyles } from '../../../components/Header';
 
-interface Missao {
-  id_missao: number;
-  data: string;
-  descricao: string;
-  local: string;
-  horario: string;
-}
-
-// Helper: formata data para YYYY-MM-DD
+// Helper: formata data para YYYY-MM-DD no fuso do aparelho
+// (toISOString usa UTC: depois das 21h no Brasil cairia no dia seguinte)
 const formatDateKey = (date: Date): string => {
-  return date.toISOString().split("T")[0];
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${m}-${d}`;
 };
 
 // Retorna os dias do mês (array de objetos com info do dia)
@@ -68,19 +65,51 @@ export default function CalendarioScreen() {
     new Map()
   );
 
-  useEffect(() => {
-    async function carregar() {
-      try {
-        const data = await getMissoes();
-        setMissoes(data as Missao[]);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
+  // Modo de edição (PIN)
+  const [modoEdicao, setModoEdicao] = useState(false);
+  const [pinVisible, setPinVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+  const [missaoEditando, setMissaoEditando] = useState<Missao | null>(null);
+
+  const carregar = useCallback(async () => {
+    try {
+      const data = await getMissoes();
+      setMissoes(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
-    carregar();
   }, []);
+
+  useEffect(() => {
+    carregar();
+    getAdminPin().then((pin) => setModoEdicao(!!pin));
+  }, [carregar]);
+
+  const alternarModoEdicao = () => {
+    if (!modoEdicao) return setPinVisible(true);
+    Alert.alert("Sair do modo de edição?", "Para editar de novo será preciso informar o PIN.", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        onPress: async () => {
+          await sairModoEdicao();
+          setModoEdicao(false);
+        },
+      },
+    ]);
+  };
+
+  const abrirEdicao = (missao: Missao | null) => {
+    setMissaoEditando(missao);
+    setEditVisible(true);
+  };
+
+  const aoSalvar = () => {
+    setEditVisible(false);
+    carregar();
+  };
 
   // Agrupar missões por data
   useEffect(() => {
@@ -141,13 +170,24 @@ export default function CalendarioScreen() {
   };
 
   const renderMissionItem = ({ item }: { item: Missao }) => (
-    <View style={styles.missionCard}>
-      <Text style={styles.missionDescription}>{item.descricao}</Text>
+    <TouchableOpacity
+      style={styles.missionCard}
+      onPress={() => abrirEdicao(item)}
+      disabled={!modoEdicao}
+      activeOpacity={0.7}
+    >
+      <View style={styles.missionTitleRow}>
+        <Text style={styles.missionDescription}>{item.descricao}</Text>
+        {modoEdicao && <Text style={styles.missionEditHint}>Editar ›</Text>}
+      </View>
       <View style={styles.missionDetailsRow}>
         <Text style={styles.missionDetail}>📍 {item.local}</Text>
         <Text style={styles.missionDetail}>🕒 {item.horario}</Text>
       </View>
-    </View>
+      {item.observacao ? (
+        <Text style={styles.missionObservacao}>ℹ️ {item.observacao}</Text>
+      ) : null}
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -165,7 +205,18 @@ export default function CalendarioScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Cabeçalho */}
         <Header>
-          <Text style={headerStyles.title}>Calendário</Text>
+          <View style={styles.headerRow}>
+            <Text style={headerStyles.title}>Calendário</Text>
+            <TouchableOpacity
+              onPress={alternarModoEdicao}
+              style={[styles.editModeButton, modoEdicao && styles.editModeButtonActive]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={[styles.editModeText, modoEdicao && styles.editModeTextActive]}>
+                {modoEdicao ? "Editando ✓" : "Editar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </Header>
 
         {/* Navegação do mês */}
@@ -257,8 +308,29 @@ export default function CalendarioScreen() {
             scrollEnabled={false}
             contentContainerStyle={styles.missionsList}
           />
+          {modoEdicao && selectedDate && (
+            <TouchableOpacity style={styles.addMissionButton} onPress={() => abrirEdicao(null)}>
+              <Text style={styles.addMissionText}>+ Nova missão neste dia</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
+
+      <PinModal
+        visible={pinVisible}
+        onClose={() => setPinVisible(false)}
+        onSuccess={() => {
+          setPinVisible(false);
+          setModoEdicao(true);
+        }}
+      />
+      <MissaoEditModal
+        visible={editVisible}
+        missao={missaoEditando}
+        dataInicial={selectedDate ? formatDateKey(selectedDate) : null}
+        onClose={() => setEditVisible(false)}
+        onSaved={aoSalvar}
+      />
     </SafeAreaView>
   );
 }
