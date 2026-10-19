@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Response
 from ..bd.db import get_connection
 import psycopg2.extras
 from datetime import date
-from ..config.auth import verify_admin_pin
+from ..config.auth import verify_admin_pin, verify_admin
 from ..schemas.missao_schema import (
     MissaoResponse,
     MissaoCreate,
@@ -116,7 +116,7 @@ def verificar_pin():
     """Usado pelo app para validar o PIN antes de liberar o modo de edição."""
     return Response(status_code=204)
 
-@router.post("/", response_model=MissaoResponse, status_code=201, dependencies=[Depends(verify_admin_pin)])
+@router.post("/", response_model=MissaoResponse, status_code=201, dependencies=[Depends(verify_admin)])
 def criar_missao(body: MissaoCreate):
 
     try:
@@ -136,7 +136,7 @@ def criar_missao(body: MissaoCreate):
 
     return _formatar_missao(missao)
 
-@router.put("/{id_missao}", response_model=MissaoResponse, dependencies=[Depends(verify_admin_pin)])
+@router.put("/{id_missao}", response_model=MissaoResponse, dependencies=[Depends(verify_admin)])
 def atualizar_missao(id_missao: int, body: MissaoUpdate):
 
     try:
@@ -164,7 +164,7 @@ def atualizar_missao(id_missao: int, body: MissaoUpdate):
 
     return _formatar_missao(missao)
 
-@router.delete("/{id_missao}", status_code=204, dependencies=[Depends(verify_admin_pin)])
+@router.delete("/{id_missao}", status_code=204, dependencies=[Depends(verify_admin)])
 def excluir_missao(id_missao: int):
 
     try:
@@ -194,7 +194,7 @@ def excluir_missao(id_missao: int):
 
     return Response(status_code=204)
 
-@router.post("/importar", response_model=MissaoImportResponse, dependencies=[Depends(verify_admin_pin)])
+@router.post("/importar", response_model=MissaoImportResponse, dependencies=[Depends(verify_admin)])
 def importar_missoes(body: MissaoImportRequest):
     """
     Importa um calendário inteiro.

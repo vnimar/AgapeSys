@@ -26,9 +26,11 @@ export async function sairModoEdicao(): Promise<void> {
   await SecureStore.deleteItemAsync(CHAVE_PIN);
 }
 
-/** Headers para chamadas que exigem o PIN. */
+/**
+ * Headers para chamadas de administração. Com login de administrador o token já
+ * vai pelo api.ts; o PIN só é enviado se estiver salvo.
+ */
 export async function adminHeaders(): Promise<Record<string, string>> {
   const pin = await getAdminPin();
-  if (!pin) throw new Error("Modo de edição desativado. Informe o PIN novamente.");
-  return { "X-Admin-Pin": pin };
+  return pin ? { "X-Admin-Pin": pin } : {};
 }

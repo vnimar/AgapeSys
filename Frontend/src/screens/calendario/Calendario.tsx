@@ -13,6 +13,7 @@ import { styles } from "./Calendario.styles";
 import { getMissoes, Missao } from "../../services/missao/missao";
 import { getAdminPin, sairModoEdicao } from "../../services/admin/admin";
 import { PinModal, MissaoEditModal } from "./CalendarioAdmin";
+import { useAuth } from "../../context/AuthContext";
 import Header, { headerStyles } from '../../../components/Header';
 
 // Helper: formata data para YYYY-MM-DD no fuso do aparelho
@@ -65,7 +66,8 @@ export default function CalendarioScreen() {
     new Map()
   );
 
-  // Modo de edição (PIN)
+  // Modo de edição: login de administrador/coord. geral ou PIN
+  const { isAdmin } = useAuth();
   const [modoEdicao, setModoEdicao] = useState(false);
   const [pinVisible, setPinVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
@@ -87,8 +89,18 @@ export default function CalendarioScreen() {
     getAdminPin().then((pin) => setModoEdicao(!!pin));
   }, [carregar]);
 
-  const alternarModoEdicao = () => {
-    if (!modoEdicao) return setPinVisible(true);
+  // Saiu da conta de administrador e não tem PIN salvo → fecha o modo de edição
+  useEffect(() => {
+    if (isAdmin) return;
+    getAdminPin().then((pin) => { if (!pin) setModoEdicao(false); });
+  }, [isAdmin]);
+
+  const alternarModoEdicao = async () => {
+    if (!modoEdicao) {
+      if (isAdmin) return setModoEdicao(true);
+      return setPinVisible(true);
+    }
+    if (isAdmin && !(await getAdminPin())) return setModoEdicao(false);
     Alert.alert("Sair do modo de edição?", "Para editar de novo será preciso informar o PIN.", [
       { text: "Cancelar", style: "cancel" },
       {

@@ -1,14 +1,16 @@
 import os
 import logging
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from dotenv import load_dotenv
 
-from ..schemas.auth_schema import UsuarioLogado
+from ..bd.db import get_connection
+from ..schemas.auth_schema import UsuarioLogado, PerfilType
 
 load_dotenv()
 
@@ -17,111 +19,141 @@ logger = logging.getLogger(__name__)
 # ── Configuração ──────────────────────────────────────────────────────────────
 #
 # JWT_SECRET: chave usada para assinar o token
-#
-# JWT_EXPIRES_HOURS: tempo de vida do token
+# JWT_EXPIRES_DAYS: por quantos dias o usuário continua logado (padrão 30)
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRES_HOURS = int(os.getenv("JWT_EXPIRES_HOURS", 24))
+JWT_EXPIRES_DAYS = int(os.getenv("JWT_EXPIRES_DAYS", 30))
 
+# Sem JWT_SECRET o login fica indisponível, mas o resto da API continua no ar
+# (o login ainda é opcional).
 if not JWT_SECRET:
-    raise RuntimeError("JWT_SECRET não configurada. Verifique o .env")
+    logger.error("JWT_SECRET não configurada: login desativado.")
+
+# Perfis que podem administrar o calendário (e futuramente outros cadastros)
+PERFIS_ADMIN: tuple[PerfilType, ...] = ("administrador", "coordenador_geral")
 
 # ── Hash de senha ─────────────────────────────────────────────────────────────
 #
-# bcrypt é o padrão da indústria para hash de senha.
-# Nunca salve senha em texto puro no banco.
-#
-# hash_senha("123456")  → "$2b$12$..." (string longa e segura)
-# verificar_senha("123456", "$2b$12$...") → True
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+# bcrypt é o padrão para hash de senha; nunca salve senha em texto puro.
+# Usamos a biblioteca bcrypt direto: o passlib 1.7.4 é incompatível com bcrypt 5.
+# O bcrypt só considera os primeiros 72 bytes — o schema limita o tamanho.
 
 def hash_senha(senha: str) -> str:
     """Gera o hash bcrypt da senha. Use antes de salvar no banco."""
-    return _pwd_context.hash(senha)
+    return bcrypt.hashpw(senha.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
-def verificar_senha(senha_pura: str, senha_hash: str) -> bool:
+def verificar_senha(senha_pura: str, senha_hash: Optional[str]) -> bool:
     """Compara a senha digitada com o hash do banco."""
-    return _pwd_context.verify(senha_pura, senha_hash)
+    if not senha_hash:
+        return False
+    try:
+        return bcrypt.checkpw(senha_pura.encode("utf-8"), senha_hash.encode("utf-8"))
+    except ValueError:
+        return False
 
 
-# ── Geração do token JWT ──────────────────────────────────────────────────────
+# Hash fixo usado quando o email não existe: o login demora o mesmo tempo nos
+# dois casos, para não revelar quais emails estão cadastrados.
+HASH_FALSO = hash_senha("usuario-inexistente")
+
+# ── Token JWT ─────────────────────────────────────────────────────────────────
 #
-# O token contém os dados do usuário (payload) e uma data de expiração.
-# É assinado com JWT_SECRET — qualquer alteração invalida o token.
+# O token guarda só o id do usuário e a expiração. Perfil, nome e status são
+# lidos do banco a cada requisição: se alguém for inativado ou mudar de perfil,
+# vale na hora, sem esperar o token vencer.
 
-def gerar_token(usuario: UsuarioLogado) -> str:
-    """Gera um JWT com os dados do usuário e expiração configurada."""
-    expiracao = datetime.now(timezone.utc) + timedelta(hours=JWT_EXPIRES_HOURS)
-
-    payload = {
-        "sub": str(usuario.id),  # "sub" é o padrão JWT para identificar o usuário
-        "nome": usuario.nome,
-        "email": usuario.email,
-        "perfil": usuario.perfil,
-        "exp": expiracao,
-    }
-
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+def _exigir_secret() -> str:
+    if not JWT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Login indisponível: JWT_SECRET não configurada no servidor."
+        )
+    return JWT_SECRET
 
 
-# ── Validação do token JWT ────────────────────────────────────────────────────
+def gerar_token(id_usuario: int) -> str:
+    """Gera um JWT para o usuário, válido por JWT_EXPIRES_DAYS dias."""
+    expiracao = datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRES_DAYS)
+    payload = {"sub": str(id_usuario), "exp": expiracao}
+    return jwt.encode(payload, _exigir_secret(), algorithm=JWT_ALGORITHM)
+
+
+def buscar_usuario_ativo(id_usuario: int) -> Optional[UsuarioLogado]:
+    """Usuário com acesso liberado: login ativo e, se ligado a um servo, servo Ativo."""
+    with get_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.id_usuario, u.nome, u.email, u.perfil, u.id_servo
+                FROM usuario u
+                LEFT JOIN servo s ON s.id_servo = u.id_servo
+                WHERE u.id_usuario = %s
+                  AND u.ativo
+                  AND (u.id_servo IS NULL OR s.status = 'Ativo')
+            """, (id_usuario,))
+            row = cursor.fetchone()
+
+    if not row:
+        return None
+    return UsuarioLogado(id=row[0], nome=row[1], email=row[2], perfil=row[3], id_servo=row[4])
+
+
+# ── Dependências do FastAPI ───────────────────────────────────────────────────
 #
-# OAuth2PasswordBearer lê o token do header "Authorization: Bearer <token>"
-# Isso é o padrão OAuth2 — o frontend envia assim automaticamente se configurado.
+# Lê o token do header "Authorization: Bearer <token>".
 
-_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+_bearer = HTTPBearer(auto_error=False)
+
+_credenciais_invalidas = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Sessão expirada ou inválida. Faça login novamente.",
+    headers={"WWW-Authenticate": "Bearer"},
+)
 
 
-def get_current_user(token: str = Depends(_oauth2_scheme)) -> UsuarioLogado:
+def get_optional_user(
+    credenciais: Optional[HTTPAuthorizationCredentials] = Depends(_bearer),
+) -> Optional[UsuarioLogado]:
     """
-    Dependência do FastAPI — valida o token e retorna o usuário logado.
-
-    Uso nos routers:
-        @router.get("/rota", dependencies=[Depends(get_current_user)])
-
-    Ou para acessar os dados do usuário:
-        @router.get("/rota")
-        def rota(usuario: UsuarioLogado = Depends(get_current_user)):
-            print(usuario.nome)
+    Usuário logado, ou None se a requisição veio sem token.
+    Token presente mas inválido/expirado → 401 (o app então faz logout).
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Token inválido ou expirado.",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    if credenciais is None:
+        return None
 
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(credenciais.credentials, _exigir_secret(), algorithms=[JWT_ALGORITHM])
+        id_usuario = int(payload["sub"])
+    except (JWTError, KeyError, ValueError):
+        raise _credenciais_invalidas
 
-        user_id = payload.get("sub")
-        if not user_id:
-            raise credentials_exception
-
-        return UsuarioLogado(
-            id=int(user_id),
-            nome=payload["nome"],
-            email=payload["email"],
-            perfil=payload["perfil"],
-        )
-
-    except JWTError:
-        raise credentials_exception
-
-
-def require_admin(usuario: UsuarioLogado = Depends(get_current_user)) -> UsuarioLogado:
-    """
-    Dependência que exige perfil admin.
-
-    Uso:
-        @router.post("/rota", dependencies=[Depends(require_admin)])
-    """
-    if usuario.perfil != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Acesso restrito a administradores."
-        )
+    usuario = buscar_usuario_ativo(id_usuario)
+    if not usuario:
+        raise _credenciais_invalidas
     return usuario
+
+
+def get_current_user(usuario: Optional[UsuarioLogado] = Depends(get_optional_user)) -> UsuarioLogado:
+    """Exige login."""
+    if usuario is None:
+        raise _credenciais_invalidas
+    return usuario
+
+
+def require_perfil(*perfis: PerfilType):
+    """
+    Exige um dos perfis. Uso:
+        @router.post("/rota", dependencies=[Depends(require_perfil("administrador"))])
+    """
+    def dependencia(usuario: UsuarioLogado = Depends(get_current_user)) -> UsuarioLogado:
+        if usuario.perfil not in perfis:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seu perfil não tem acesso a esta função."
+            )
+        return usuario
+    return dependencia
+
+
+require_admin = require_perfil("administrador")
