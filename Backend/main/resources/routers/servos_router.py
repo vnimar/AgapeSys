@@ -28,7 +28,9 @@ def listar_servos():
                               '[]'
                       ) AS pastas
                FROM servo s
+                        -- Só as pastas do ano atual (servo_pasta guarda o histórico de todos os anos)
                         LEFT JOIN servo_pasta sp ON sp.id_servo = s.id_servo
+                                                AND sp.ano = EXTRACT(YEAR FROM CURRENT_DATE)
                         LEFT JOIN pasta p ON p.id_pasta = sp.id_pasta
                GROUP BY s.id_servo
                ORDER BY s.nome
