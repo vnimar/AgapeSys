@@ -22,7 +22,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: 'Home',
+                    title: 'Início',
                     tabBarIcon: ({color}) => <IconSymbol size={28} name="house.fill" color={color}/>,
                 }}/>
             <Tabs.Screen
@@ -36,7 +36,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="calendario"
                 options={{
-                    title: 'Calendario',
+                    title: 'Calendário',
                     tabBarIcon: ({color}) => (
                         <IconSymbol size={28} name="calendar" color={color}/>
                     ),
@@ -44,9 +44,9 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="frequencia"
                 options={{
-                    title: 'Frequencia',
+                    title: 'Frequência',
                     tabBarIcon: ({color}) => (
-                        <IconSymbol size={28} name="account-check-outline" color={color}/>
+                        <IconSymbol size={28} name="checkmark.circle" color={color}/>
                     ),
                 }}/>
         </Tabs>

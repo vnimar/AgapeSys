@@ -15,7 +15,8 @@
       "url": "https://u.expo.dev/fba5df82-a571-42ec-a692-23a472b6c26e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vnimar.AgapeMobile"
     },
     "android": {
       "adaptiveIcon": {

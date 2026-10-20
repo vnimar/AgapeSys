@@ -23,6 +23,7 @@ const MAPPING = {
   'person.4.fill': 'mci:account-multiple',
   'calendar': 'mi:calendar-today',
   'account-check-outline': 'mci:account-check-outline',
+  'checkmark.circle': 'mci:account-check-outline',
 } as const;
 
 /**
