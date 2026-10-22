@@ -6,6 +6,7 @@ import ScreenWrapper from '../../../components/ScreenWrapper';
 import {formatarDataBR, styles} from './Home.styles';
 import {getProximaMissao, getUltimasMissoes} from '../../services/missao/missao';
 import Header, { headerStyles } from '../../../components/Header';
+import {useAuth} from '../../context/AuthContext';
 
 interface Missao {
   id_missao: number;
@@ -15,6 +16,8 @@ interface Missao {
 
 const Home: React.FC = () => {
   const router = useRouter();
+  const {usuario, cuidaDosServos} = useAuth();
+  const primeiroNome = usuario?.nome.split(' ')[0] || 'Servo';
 
   const [missao, setMissao] = useState<Missao | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +51,7 @@ const Home: React.FC = () => {
   <ScreenWrapper scrollable={true}>
     <Header>
       <Text style={headerStyles.title}>
-        Olá, <Text style={styles.username}>Servo!</Text>
+        Olá, <Text style={styles.username}>{primeiroNome}!</Text>
       </Text>
     </Header>
 
@@ -74,24 +77,28 @@ const Home: React.FC = () => {
       </View>
       {/* Grid de Ações */}
       <View style={styles.grid}>
-        <TouchableOpacity
-          style={[styles.button, styles.green]}
-          onPress={() => router.push('/servo')}
-        >
-          <Text style={styles.buttonText}>Lista de Servos</Text>
-        </TouchableOpacity>
+        {cuidaDosServos && (
+          <TouchableOpacity
+            style={[styles.button, styles.green]}
+            onPress={() => router.push('/servo')}
+          >
+            <Text style={styles.buttonText}>Lista de Servos</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={[styles.button, styles.purple]}
           onPress={() => router.push('/calendario')}
         >
           <Text style={styles.buttonText}>Calendário</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.blue]}
-          onPress={() => router.push('/frequencia')}
-        >
-          <Text style={styles.buttonText}>Chamada</Text>
-        </TouchableOpacity>
+        {cuidaDosServos && (
+          <TouchableOpacity
+            style={[styles.button, styles.blue]}
+            onPress={() => router.push('/frequencia')}
+          >
+            <Text style={styles.buttonText}>Chamada</Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={[styles.button, styles.orange]}
           onPress={() => console.log("Exportar")}

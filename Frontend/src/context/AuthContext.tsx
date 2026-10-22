@@ -4,6 +4,8 @@ import { setAuthToken, setOnSessaoExpirada } from "../services/api";
 import {
   Usuario,
   PERFIS_ADMIN,
+  PERFIS_COORD_SERVOS,
+  buscarLoginObrigatorio,
   login as loginApi,
   buscarUsuarioLogado,
   lerTokenSalvo,
@@ -11,17 +13,22 @@ import {
   apagarToken,
 } from "../services/auth/auth";
 
-// O login ainda é opcional: sem sessão o app funciona como antes.
-// Com sessão, o token vai em todas as chamadas e libera funções do perfil.
+// Enquanto o backend não exige login (LOGIN_OBRIGATORIO), sem sessão o app
+// funciona como antes. Com sessão, o token vai em todas as chamadas e o que
+// aparece depende do perfil.
 
 const CHAVE_USUARIO = "agapello_auth_usuario";
+const CHAVE_LOGIN_OBRIGATORIO = "agapello_login_obrigatorio";
 
 interface AuthContextValue {
   usuario: Usuario | null;
   carregando: boolean;        // restaurando a sessão salva ao abrir o app
   isAdmin: boolean;
+  loginObrigatorio: boolean;  // backend já exige login de todos
+  cuidaDosServos: boolean;    // pode ver a lista de servos e fazer a chamada
   entrar: (email: string, senha: string) => Promise<void>;
   sair: () => Promise<void>;
+  recarregarUsuario: () => Promise<void>;  // ex.: depois de trocar a senha
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -29,6 +36,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [loginObrigatorio, setLoginObrigatorio] = useState(false);
 
   const sair = useCallback(async () => {
     setAuthToken(null);
@@ -44,6 +52,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setOnSessaoExpirada(() => { sair(); });
     return () => setOnSessaoExpirada(null);
   }, [sair]);
+
+  // Login obrigatório: usa o último valor salvo e confere com o backend
+  useEffect(() => {
+    (async () => {
+      try {
+        const salvo = await SecureStore.getItemAsync(CHAVE_LOGIN_OBRIGATORIO);
+        if (salvo) setLoginObrigatorio(salvo === "true");
+      } catch {}
+      try {
+        const atual = await buscarLoginObrigatorio();
+        setLoginObrigatorio(atual);
+        await SecureStore.setItemAsync(CHAVE_LOGIN_OBRIGATORIO, String(atual));
+      } catch {}
+    })();
+  }, []);
 
   // Restaura a sessão salva
   useEffect(() => {
@@ -79,13 +102,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUsuario(resposta.usuario);
   }, []);
 
+  const recarregarUsuario = useCallback(async () => {
+    const atual = await buscarUsuarioLogado();
+    setUsuario(atual);
+    await SecureStore.setItemAsync(CHAVE_USUARIO, JSON.stringify(atual));
+  }, []);
+
   const value = useMemo<AuthContextValue>(() => ({
     usuario,
     carregando,
     isAdmin: !!usuario && PERFIS_ADMIN.includes(usuario.perfil),
+    loginObrigatorio,
+    // Sem login (só na transição) continua vendo tudo, como antes
+    cuidaDosServos: usuario ? PERFIS_COORD_SERVOS.includes(usuario.perfil) : !loginObrigatorio,
     entrar,
     sair,
-  }), [usuario, carregando, entrar, sair]);
+    recarregarUsuario,
+  }), [usuario, carregando, loginObrigatorio, entrar, sair, recarregarUsuario]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

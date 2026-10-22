@@ -15,6 +15,7 @@ export interface Usuario {
   email: string;
   perfil: Perfil;
   id_servo: number | null;
+  trocar_senha?: boolean;  // senha temporária: precisa trocar antes de usar o app
 }
 
 export const PERFIL_LABEL: Record<Perfil, string> = {
@@ -28,6 +29,19 @@ export const PERFIL_LABEL: Record<Perfil, string> = {
 
 /** Perfis que administram o calendário (mesma lista do backend). */
 export const PERFIS_ADMIN: Perfil[] = ["administrador", "coordenador_geral"];
+
+/** Perfis que cuidam dos servos: lista de servos e chamada (mesma lista do backend). */
+export const PERFIS_COORD_SERVOS: Perfil[] = [
+  "coordenador_formacao_vivencia",
+  "coordenador_geral",
+  "administrador",
+];
+
+/** Se o backend já exige login de todos (LOGIN_OBRIGATORIO no Render). */
+export async function buscarLoginObrigatorio(): Promise<boolean> {
+  const config = await apiRequest<{ login_obrigatorio: boolean }>("/auth/config");
+  return !!config.login_obrigatorio;
+}
 
 const CHAVE_TOKEN = "agapello_auth_token";
 

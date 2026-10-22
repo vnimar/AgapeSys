@@ -21,7 +21,7 @@ function iniciais(nome: string) {
 }
 
 export default function ContaScreen() {
-  const { usuario, sair } = useAuth();
+  const { usuario, sair, recarregarUsuario } = useAuth();
   const [trocando, setTrocando] = useState(false);
   const [senhaAtual, setSenhaAtual] = useState("");
   const [senhaNova, setSenhaNova] = useState("");
@@ -68,6 +68,7 @@ export default function ContaScreen() {
     setSalvando(true);
     try {
       await trocarSenha(senhaAtual, senhaNova);
+      await recarregarUsuario().catch(() => {});
       Alert.alert("Pronto", "Senha alterada.");
       setTrocando(false);
       setSenhaAtual("");
@@ -104,6 +105,12 @@ export default function ContaScreen() {
               <Text style={styles.cardValue}>{PERFIL_LABEL[usuario.perfil] ?? usuario.perfil}</Text>
             </View>
           </View>
+
+          {usuario.perfil === "administrador" && (
+            <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push("/usuarios")}>
+              <Text style={styles.btnPrimaryText}>Gerenciar usuários</Text>
+            </TouchableOpacity>
+          )}
 
           {trocando ? (
             <View style={styles.card}>

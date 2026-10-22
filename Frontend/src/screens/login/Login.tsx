@@ -17,7 +17,7 @@ import { useAuth } from "../../context/AuthContext";
 import { authStyles as styles } from "./Login.styles";
 
 export default function LoginScreen() {
-  const { entrar } = useAuth();
+  const { entrar, loginObrigatorio } = useAuth();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -44,9 +44,12 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <TouchableOpacity style={styles.fechar} onPress={fechar} hitSlop={12}>
-        <Text style={styles.fecharText}>✕</Text>
-      </TouchableOpacity>
+      {/* Com login obrigatório não há para onde voltar sem entrar */}
+      {!loginObrigatorio && (
+        <TouchableOpacity style={styles.fechar} onPress={fechar} hitSlop={12}>
+          <Text style={styles.fecharText}>✕</Text>
+        </TouchableOpacity>
+      )}
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">

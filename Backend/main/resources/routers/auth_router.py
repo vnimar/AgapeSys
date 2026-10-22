@@ -18,6 +18,7 @@ from ..config.security import (
     get_current_user,
     require_admin,
 )
+from ..config import security
 from ..config.rate_limit import LimitadorTentativas, ip_do_cliente
 
 logger = logging.getLogger(__name__)
@@ -52,7 +53,8 @@ def login(body: LoginRequest, request: Request):
             with conn.cursor() as cursor:
                 cursor.execute("""
                     SELECT u.id_usuario, u.nome, u.email, u.senha_hash, u.perfil, u.id_servo,
-                           u.ativo AND (u.id_servo IS NULL OR s.status = 'Ativo') AS liberado
+                           u.ativo AND (u.id_servo IS NULL OR s.status = 'Ativo') AS liberado,
+                           u.trocar_senha
                     FROM usuario u
                     LEFT JOIN servo s ON s.id_servo = u.id_servo
                     WHERE lower(u.email) = %s
@@ -102,8 +104,17 @@ def login(body: LoginRequest, request: Request):
             email=usuario[2],
             perfil=usuario[4],
             id_servo=usuario[5],
+            trocar_senha=usuario[7],
         ),
     )
+
+
+# ── GET /auth/config ──────────────────────────────────────────────────────────
+
+@router.get("/config")
+def config():
+    """O app consulta ao abrir para saber se já precisa exigir login."""
+    return {"login_obrigatorio": security.LOGIN_OBRIGATORIO}
 
 
 # ── GET /auth/me ──────────────────────────────────────────────────────────────
@@ -132,9 +143,12 @@ def trocar_senha(body: TrocarSenhaRequest, usuario: UsuarioLogado = Depends(get_
 
                 if not atual or not verificar_senha(body.senha_atual, atual[0]):
                     raise HTTPException(status_code=400, detail="Senha atual incorreta.")
+                if body.senha_nova == body.senha_atual:
+                    raise HTTPException(status_code=400, detail="A nova senha precisa ser diferente da atual.")
 
+                # Trocou a senha → deixa de ser temporária
                 cursor.execute(
-                    "UPDATE usuario SET senha_hash = %s WHERE id_usuario = %s",
+                    "UPDATE usuario SET senha_hash = %s, trocar_senha = false WHERE id_usuario = %s",
                     (hash_senha(body.senha_nova), usuario.id)
                 )
 

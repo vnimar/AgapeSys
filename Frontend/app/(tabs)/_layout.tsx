@@ -1,15 +1,29 @@
- import { Tabs } from 'expo-router';
+ import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
- import Header from "@/components/Header";
+import { useAuth } from '@/src/context/AuthContext';
 
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { usuario, carregando, loginObrigatorio, cuidaDosServos } = useAuth();
+
+  // Login obrigatório e ninguém logado → tela de login
+  if (!carregando && loginObrigatorio && !usuario) {
+    return <Redirect href="/login" />;
+  }
+
+  // Entrou com senha temporária → troca antes de usar o app
+  if (usuario?.trocar_senha) {
+    return <Redirect href="/trocar-senha" />;
+  }
+
+  // Abas só de quem cuida dos servos ficam escondidas para os outros perfis
+  const soCoordServos = cuidaDosServos ? {} : { href: null };
 
   // @ts-ignore
     return (
@@ -28,6 +42,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="servo"
                 options={{
+                    ...soCoordServos,
                     title: 'Servo',
                     tabBarIcon: ({color}) => (
                         <IconSymbol size={28} name="person.2.fill" color={color}/>
@@ -44,6 +59,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="frequencia"
                 options={{
+                    ...soCoordServos,
                     title: 'Frequência',
                     tabBarIcon: ({color}) => (
                         <IconSymbol size={28} name="checkmark.circle" color={color}/>

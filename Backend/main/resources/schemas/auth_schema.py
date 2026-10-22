@@ -51,6 +51,7 @@ class UsuarioLogado(BaseModel):
     email: str
     perfil: PerfilType
     id_servo: Optional[int] = None
+    trocar_senha: bool = False  # senha temporária: o app obriga a trocar
 
 class TokenResponse(BaseModel):
     access_token: str

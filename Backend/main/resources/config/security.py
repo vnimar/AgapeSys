@@ -97,7 +97,7 @@ def buscar_usuario_ativo(id_usuario: int) -> Optional[UsuarioLogado]:
     with get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute("""
-                SELECT u.id_usuario, u.nome, u.email, u.perfil, u.id_servo
+                SELECT u.id_usuario, u.nome, u.email, u.perfil, u.id_servo, u.trocar_senha
                 FROM usuario u
                 LEFT JOIN servo s ON s.id_servo = u.id_servo
                 WHERE u.id_usuario = %s
@@ -108,7 +108,9 @@ def buscar_usuario_ativo(id_usuario: int) -> Optional[UsuarioLogado]:
 
     if not row:
         return None
-    return UsuarioLogado(id=row[0], nome=row[1], email=row[2], perfil=row[3], id_servo=row[4])
+    return UsuarioLogado(
+        id=row[0], nome=row[1], email=row[2], perfil=row[3], id_servo=row[4], trocar_senha=row[5]
+    )
 
 
 # ── Dependências do FastAPI ───────────────────────────────────────────────────

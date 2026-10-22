@@ -39,6 +39,10 @@ ROTAS = [
     # Contas
     ("GET", "/auth/me", None, TODOS),
     ("POST", "/auth/register", {}, SO_ADMIN),
+    ("GET", "/usuarios/", None, SO_ADMIN),
+    ("POST", "/usuarios/", {}, SO_ADMIN),
+    ("PUT", f"/usuarios/{INEXISTENTE}", {}, SO_ADMIN),
+    ("POST", f"/usuarios/{INEXISTENTE}/resetar-senha", None, SO_ADMIN),
 ]
 
 PERFIS = sorted(TODOS) + [None]  # None = sem login
@@ -140,3 +144,14 @@ def test_rotas_devolvem_a_conexao_ao_pool(client, headers, usuarios):
     for _ in range(15):
         assert client.get("/servos/", headers=headers("admin")).status_code == 200
         assert client.get(f"/servos/{usuarios['servo'][1]}", headers=headers("servo")).status_code == 200
+
+
+# ── Configuração lida pelo app ───────────────────────────────────────────────
+
+@pytest.mark.parametrize("ligado", [True, False])
+def test_config_informa_se_o_login_e_obrigatorio(client, headers, monkeypatch, ligado):
+    from resources.config import security
+    monkeypatch.setattr(security, "LOGIN_OBRIGATORIO", ligado)
+    resposta = client.get("/auth/config", headers=headers(None))
+    assert resposta.status_code == 200
+    assert resposta.json() == {"login_obrigatorio": ligado}
