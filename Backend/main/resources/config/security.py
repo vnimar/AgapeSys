@@ -5,7 +5,7 @@ from typing import Optional
 
 import bcrypt
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from dotenv import load_dotenv
 
@@ -30,8 +30,20 @@ JWT_EXPIRES_DAYS = int(os.getenv("JWT_EXPIRES_DAYS", 30))
 if not JWT_SECRET:
     logger.error("JWT_SECRET não configurada: login desativado.")
 
+# Enquanto nem todos têm conta, chamadas sem login continuam liberadas e só ficam
+# registradas no log. Quando todos tiverem conta, ligue LOGIN_OBRIGATORIO=true no Render.
+# Quem está logado já é limitado pelo perfil nos dois modos.
+LOGIN_OBRIGATORIO = os.getenv("LOGIN_OBRIGATORIO", "false").lower() == "true"
+
 # Perfis que podem administrar o calendário (e futuramente outros cadastros)
 PERFIS_ADMIN: tuple[PerfilType, ...] = ("administrador", "coordenador_geral")
+
+# Perfis que cuidam dos servos: lista de servos e chamada de servos
+PERFIS_COORD_SERVOS: tuple[PerfilType, ...] = (
+    "coordenador_formacao_vivencia",
+    "coordenador_geral",
+    "administrador",
+)
 
 # ── Hash de senha ─────────────────────────────────────────────────────────────
 #
@@ -157,3 +169,32 @@ def require_perfil(*perfis: PerfilType):
 
 
 require_admin = require_perfil("administrador")
+
+
+def exigir_perfil(*perfis: PerfilType):
+    """
+    Como require_perfil, mas respeitando a transição do LOGIN_OBRIGATORIO:
+    sem login, libera (e registra no log) enquanto o login não for obrigatório.
+    Sem perfis informados, basta estar logado. Devolve o usuário, ou None sem login.
+    """
+    def dependencia(
+        request: Request,
+        usuario: Optional[UsuarioLogado] = Depends(get_optional_user),
+    ) -> Optional[UsuarioLogado]:
+        if usuario is None:
+            if LOGIN_OBRIGATORIO:
+                raise _credenciais_invalidas
+            logger.warning("Chamada sem login: %s %s", request.method, request.url.path)
+            return None
+        if perfis and usuario.perfil not in perfis:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Seu perfil não tem acesso a esta função."
+            )
+        return usuario
+    return dependencia
+
+
+# Dependências prontas, usadas nos routers
+exigir_login = exigir_perfil()
+exigir_coord_servos = exigir_perfil(*PERFIS_COORD_SERVOS)

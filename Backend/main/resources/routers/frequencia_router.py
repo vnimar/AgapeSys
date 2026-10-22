@@ -1,8 +1,11 @@
 import logging
-from fastapi import APIRouter, HTTPException
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Depends
 from ..bd.db import get_connection
 import psycopg2.extras
 from datetime import date
+from ..config.security import exigir_coord_servos
+from ..schemas.auth_schema import UsuarioLogado
 from ..schemas.frequencia_schema import (
     FrequenciaCreate,
     FrequenciaUpdate,
@@ -16,10 +19,14 @@ from ..schemas.frequencia_schema import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/frequencia", tags=["Frequência"])
+# Chamada de servos: coord. formação/vivência, coord. geral e administrador
+router = APIRouter(prefix="/frequencia", tags=["Frequência"], dependencies=[Depends(exigir_coord_servos)])
 
 @router.post("/register", response_model=MessageResponse, status_code=201)
-def register_frequencia(body: FrequenciaCreate):
+def register_frequencia(
+    body: FrequenciaCreate,
+    usuario: Optional[UsuarioLogado] = Depends(exigir_coord_servos),
+):
 
     try:
         with get_connection() as conn:
@@ -47,9 +54,10 @@ def register_frequencia(body: FrequenciaCreate):
                 # 3. Inserir
                 # Não precisa de conn.commit() — o context manager commita automaticamente
                 cursor.execute("""
-                    INSERT INTO frequencia (id_servo, id_missao, status, data)
-                    VALUES (%s, %s, %s, %s)
-                """, (body.id_servo, body.id_missao, body.status, date.today()))
+                    INSERT INTO frequencia (id_servo, id_missao, status, data, registrado_por)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (body.id_servo, body.id_missao, body.status, date.today(),
+                      usuario.id if usuario else None))
 
     except HTTPException:
         raise  # repassa HTTPException sem virar 500
@@ -172,7 +180,11 @@ def get_frequencia(id_missao: int):
     )
 
 @router.put("/update", response_model=MessageResponse)
-def update_frequencia(body: FrequenciaUpdate):
+def update_frequencia(
+    body: FrequenciaUpdate,
+    usuario: Optional[UsuarioLogado] = Depends(exigir_coord_servos),
+):
+    id_usuario = usuario.id if usuario else None
 
     try:
         with get_connection() as conn:
@@ -188,16 +200,16 @@ def update_frequencia(body: FrequenciaUpdate):
 
                 cursor.execute("""
                     UPDATE frequencia
-                    SET status = %s
+                    SET status = %s, atualizado_por = %s
                     WHERE id_servo = %s AND id_missao = %s
-                """, (body.status, body.id_servo, body.id_missao))
+                """, (body.status, id_usuario, body.id_servo, body.id_missao))
 
                 # Servo sem registro nessa missão (ex.: cadastrado depois da chamada)
                 if cursor.rowcount == 0:
                     cursor.execute("""
-                        INSERT INTO frequencia (id_servo, id_missao, status, data)
-                        VALUES (%s, %s, %s, %s)
-                    """, (body.id_servo, body.id_missao, body.status, date.today()))
+                        INSERT INTO frequencia (id_servo, id_missao, status, data, registrado_por)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (body.id_servo, body.id_missao, body.status, date.today(), id_usuario))
 
     except HTTPException:
         raise

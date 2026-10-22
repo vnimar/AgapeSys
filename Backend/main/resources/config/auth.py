@@ -7,6 +7,7 @@ from fastapi.security.api_key import APIKeyHeader
 from dotenv import load_dotenv
 
 from .rate_limit import LimitadorTentativas, ip_do_cliente
+from . import security
 from .security import PERFIS_ADMIN, get_optional_user
 from ..schemas.auth_schema import UsuarioLogado
 
@@ -26,7 +27,8 @@ def verify_api_key(key: str = Security(api_key_header)):
         )
 
 # PIN de administração — protege a edição/importação de missões enquanto o login
-# não é obrigatório. Fica só no servidor (variável ADMIN_PIN no Render).
+# não é obrigatório (com LOGIN_OBRIGATORIO=true ele deixa de valer).
+# Fica só no servidor (variável ADMIN_PIN no Render).
 ADMIN_PIN = os.getenv("ADMIN_PIN")
 
 admin_pin_header = APIKeyHeader(name="X-Admin-Pin", auto_error=False)
@@ -60,13 +62,26 @@ def verify_admin(
     pin: Optional[str] = Security(admin_pin_header),
     usuario: Optional[UsuarioLogado] = Depends(get_optional_user),
 ):
-    """Libera funções de administração por login (administrador / coord. geral) ou PIN."""
-    if usuario is not None:
-        if usuario.perfil in PERFIS_ADMIN:
-            return
-        if not pin:
+    """
+    Libera funções de administração por login (administrador / coord. geral).
+    Enquanto o login não é obrigatório, o PIN também vale.
+    """
+    if usuario is not None and usuario.perfil in PERFIS_ADMIN:
+        return
+
+    sem_permissao = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Seu perfil não tem acesso a esta função."
+    )
+    if security.LOGIN_OBRIGATORIO:
+        if usuario is None:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Seu perfil não tem acesso a esta função."
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Faça login para continuar.",
+                headers={"WWW-Authenticate": "Bearer"},
             )
+        raise sem_permissao
+
+    if usuario is not None and not pin:
+        raise sem_permissao
     verify_admin_pin(request, pin)

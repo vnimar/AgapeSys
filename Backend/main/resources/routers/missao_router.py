@@ -4,6 +4,7 @@ from ..bd.db import get_connection
 import psycopg2.extras
 from datetime import date
 from ..config.auth import verify_admin_pin, verify_admin
+from ..config.security import exigir_login
 from ..schemas.missao_schema import (
     MissaoResponse,
     MissaoCreate,
@@ -15,7 +16,8 @@ from ..schemas.missao_schema import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/missao", tags=["Missão"])
+# Ver o calendário: qualquer perfil logado. Editar: verify_admin em cada rota.
+router = APIRouter(prefix="/missao", tags=["Missão"], dependencies=[Depends(exigir_login)])
 
 CAMPOS = "id_missao, data, descricao, horario, local, publico, conta_frequencia, observacao"
 
