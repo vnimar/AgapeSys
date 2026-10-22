@@ -13,7 +13,8 @@ export interface Usuario {
   id: number;
   nome: string;
   email: string;
-  perfil: Perfil;
+  perfil: Perfil;            // principal (o mais alto)
+  perfis?: Perfil[];         // todos: o manual + os das pastas do ano
   id_servo: number | null;
   trocar_senha?: boolean;  // senha temporária: precisa trocar antes de usar o app
 }
@@ -26,6 +27,12 @@ export const PERFIL_LABEL: Record<Perfil, string> = {
   coordenador_geral: "Coordenador Geral",
   administrador: "Administrador",
 };
+
+/** Se o usuário tem pelo menos um dos perfis (somando o manual e os das pastas). */
+export function temPerfil(usuario: Usuario | null, perfis: Perfil[]): boolean {
+  if (!usuario) return false;
+  return (usuario.perfis ?? [usuario.perfil]).some((p) => perfis.includes(p));
+}
 
 /** Perfis que administram o calendário (mesma lista do backend). */
 export const PERFIS_ADMIN: Perfil[] = ["administrador", "coordenador_geral"];

@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from dotenv import load_dotenv
 
 from ..bd.db import get_connection
-from ..schemas.auth_schema import UsuarioLogado, PerfilType
+from ..schemas.auth_schema import UsuarioLogado, PerfilType, ordenar_perfis
 
 load_dotenv()
 
@@ -93,13 +93,19 @@ def gerar_token(id_usuario: int) -> str:
 
 
 def buscar_usuario_ativo(id_usuario: int) -> Optional[UsuarioLogado]:
-    """Usuário com acesso liberado: login ativo e, se ligado a um servo, servo Ativo."""
+    """
+    Usuário com acesso liberado: login ativo e, se ligado a um servo, servo Ativo.
+    Os perfis somam o perfil manual (usuario.perfil) com os das pastas do ano
+    vigente (vw_perfis_pasta) — trocou de pasta, o acesso muda na hora.
+    """
     with get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute("""
-                SELECT u.id_usuario, u.nome, u.email, u.perfil, u.id_servo, u.trocar_senha
+                SELECT u.id_usuario, u.nome, u.email, u.perfil, u.id_servo, u.trocar_senha,
+                       COALESCE(pp.perfis, '{}') AS perfis_pasta
                 FROM usuario u
                 LEFT JOIN servo s ON s.id_servo = u.id_servo
+                LEFT JOIN vw_perfis_pasta pp ON pp.id_servo = u.id_servo
                 WHERE u.id_usuario = %s
                   AND u.ativo
                   AND (u.id_servo IS NULL OR s.status = 'Ativo')
@@ -108,8 +114,10 @@ def buscar_usuario_ativo(id_usuario: int) -> Optional[UsuarioLogado]:
 
     if not row:
         return None
+    perfis = ordenar_perfis([row[3], *row[6]])
     return UsuarioLogado(
-        id=row[0], nome=row[1], email=row[2], perfil=row[3], id_servo=row[4], trocar_senha=row[5]
+        id=row[0], nome=row[1], email=row[2], perfil=perfis[0], perfis=perfis,
+        id_servo=row[4], trocar_senha=row[5],
     )
 
 
@@ -161,7 +169,7 @@ def require_perfil(*perfis: PerfilType):
         @router.post("/rota", dependencies=[Depends(require_perfil("administrador"))])
     """
     def dependencia(usuario: UsuarioLogado = Depends(get_current_user)) -> UsuarioLogado:
-        if usuario.perfil not in perfis:
+        if not usuario.tem(*perfis):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Seu perfil não tem acesso a esta função."
@@ -188,7 +196,7 @@ def exigir_perfil(*perfis: PerfilType):
                 raise _credenciais_invalidas
             logger.warning("Chamada sem login: %s %s", request.method, request.url.path)
             return None
-        if perfis and usuario.perfil not in perfis:
+        if perfis and not usuario.tem(*perfis):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Seu perfil não tem acesso a esta função."

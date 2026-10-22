@@ -7,7 +7,8 @@ export interface UsuarioAdmin {
   id: number;
   nome: string;
   email: string;
-  perfil: Perfil;
+  perfil: Perfil;          // manual (ex.: administrador)
+  perfis_pasta: Perfil[];  // vêm das pastas do ano
   ativo: boolean;
   id_servo: number | null;
   servo_nome: string | null;

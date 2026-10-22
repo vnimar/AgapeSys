@@ -19,7 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 
 import { useAuth } from "../../context/AuthContext";
-import { Perfil, PERFIL_LABEL } from "../../services/auth/auth";
+import { Perfil, PERFIL_LABEL, temPerfil } from "../../services/auth/auth";
 import { getServos } from "../../services/servos/servos";
 import {
   UsuarioAdmin,
@@ -88,7 +88,7 @@ export default function UsuariosScreen() {
     return usuarios.filter((u) => semAcento(`${u.nome} ${u.email} ${u.servo_nome ?? ""}`).includes(termo));
   }, [usuarios, busca]);
 
-  if (usuario?.perfil !== "administrador") {
+  if (!temPerfil(usuario, ["administrador"])) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <Text style={styles.vazio}>Só o administrador gerencia usuários.</Text>
@@ -151,9 +151,16 @@ export default function UsuariosScreen() {
               <Text style={styles.itemLinha}>{item.email}</Text>
               <Text style={styles.itemLinha}>{formatarUltimoLogin(item.ultimo_login)}</Text>
               <View style={styles.selos}>
-                <View style={styles.selo}>
-                  <Text style={styles.seloText}>{PERFIL_LABEL[item.perfil] ?? item.perfil}</Text>
-                </View>
+                {(item.perfil !== "servo" || item.perfis_pasta.length === 0) && (
+                  <View style={styles.selo}>
+                    <Text style={styles.seloText}>{PERFIL_LABEL[item.perfil] ?? item.perfil}</Text>
+                  </View>
+                )}
+                {item.perfis_pasta.map((p) => (
+                  <View key={p} style={styles.selo}>
+                    <Text style={styles.seloText}>{PERFIL_LABEL[p] ?? p} · pasta</Text>
+                  </View>
+                ))}
                 {!item.ativo && (
                   <View style={[styles.selo, styles.seloPerigo]}>
                     <Text style={[styles.seloText, styles.seloPerigoText]}>Login desativado</Text>
@@ -178,7 +185,7 @@ export default function UsuariosScreen() {
       <FormUsuario
         visivel={formAberto}
         usuario={editando}
-        souEu={editando?.id === usuario.id}
+        souEu={editando?.id === usuario?.id}
         servos={servos}
         servosComLogin={new Set(usuarios.filter((u) => u.id_servo).map((u) => u.id_servo as number))}
         onFechar={() => setFormAberto(false)}
@@ -321,7 +328,20 @@ function FormUsuario({
                        onChangeText={(email) => setForm((f) => ({ ...f, email }))}
                        autoCapitalize="none" autoCorrect={false} keyboardType="email-address" />
 
-            <Text style={authStyles.label}>Perfil</Text>
+            {usuario && usuario.perfis_pasta.length > 0 && (
+              <>
+                <Text style={authStyles.label}>Acesso pelas pastas do ano</Text>
+                <Text style={styles.servoEscolhidoText}>
+                  {usuario.perfis_pasta.map((p) => PERFIL_LABEL[p] ?? p).join(", ")}
+                </Text>
+              </>
+            )}
+
+            <Text style={authStyles.label}>Perfil manual</Text>
+            <Text style={[styles.itemLinha, { marginBottom: 8 }]}>
+              Quem tem pasta de coordenação já recebe o acesso dela. Use um perfil aqui
+              só para quem precisa de acesso sem ter a pasta (ex.: administrador).
+            </Text>
             <View style={styles.opcoes}>
               {PERFIS.map((p) => {
                 const ativo = form.perfil === p;

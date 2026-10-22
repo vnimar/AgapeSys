@@ -17,6 +17,7 @@ from ..config.security import (
     gerar_token,
     get_current_user,
     require_admin,
+    buscar_usuario_ativo,
 )
 from ..config import security
 from ..config.rate_limit import LimitadorTentativas, ip_do_cliente
@@ -52,9 +53,8 @@ def login(body: LoginRequest, request: Request):
         with get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    SELECT u.id_usuario, u.nome, u.email, u.senha_hash, u.perfil, u.id_servo,
-                           u.ativo AND (u.id_servo IS NULL OR s.status = 'Ativo') AS liberado,
-                           u.trocar_senha
+                    SELECT u.id_usuario, u.senha_hash,
+                           u.ativo AND (u.id_servo IS NULL OR s.status = 'Ativo') AS liberado
                     FROM usuario u
                     LEFT JOIN servo s ON s.id_servo = u.id_servo
                     WHERE lower(u.email) = %s
@@ -66,7 +66,7 @@ def login(body: LoginRequest, request: Request):
         raise HTTPException(status_code=500, detail="Erro interno.")
 
     # Valida email e senha — mesma mensagem para os dois casos (segurança)
-    senha_ok = verificar_senha(body.senha, usuario[3] if usuario else HASH_FALSO)
+    senha_ok = verificar_senha(body.senha, usuario[1] if usuario else HASH_FALSO)
     if not usuario or not senha_ok:
         _limitador_login.registrar_falha(chave)
         raise HTTPException(
@@ -75,7 +75,7 @@ def login(body: LoginRequest, request: Request):
         )
 
     # Senha certa, mas acesso bloqueado (login desativado ou servo afastado)
-    if not usuario[6]:
+    if not usuario[2]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Seu acesso está inativo. Fale com a coordenação."
@@ -83,6 +83,11 @@ def login(body: LoginRequest, request: Request):
 
     _limitador_login.limpar(chave)
     token = gerar_token(usuario[0])
+
+    # Mesmo cálculo de perfis do /auth/me (perfil manual + pastas do ano)
+    logado = buscar_usuario_ativo(usuario[0])
+    if not logado:
+        raise HTTPException(status_code=500, detail="Erro interno.")
 
     try:
         with get_connection() as conn:
@@ -98,14 +103,7 @@ def login(body: LoginRequest, request: Request):
     return TokenResponse(
         access_token=token,
         expira_em_dias=JWT_EXPIRES_DAYS,
-        usuario=UsuarioLogado(
-            id=usuario[0],
-            nome=usuario[1],
-            email=usuario[2],
-            perfil=usuario[4],
-            id_servo=usuario[5],
-            trocar_senha=usuario[7],
-        ),
+        usuario=logado,
     )
 
 

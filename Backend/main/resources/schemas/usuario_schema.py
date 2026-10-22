@@ -11,7 +11,8 @@ class UsuarioItem(BaseModel):
     id: int
     nome: str
     email: str
-    perfil: PerfilType
+    perfil: PerfilType                          # perfil manual (ex.: administrador)
+    perfis_pasta: list[PerfilType] = []         # perfis que vêm das pastas do ano
     ativo: bool
     id_servo: Optional[int] = None
     servo_nome: Optional[str] = None

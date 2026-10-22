@@ -66,7 +66,7 @@ def verify_admin(
     Libera funções de administração por login (administrador / coord. geral).
     Enquanto o login não é obrigatório, o PIN também vale.
     """
-    if usuario is not None and usuario.perfil in PERFIS_ADMIN:
+    if usuario is not None and usuario.tem(*PERFIS_ADMIN):
         return
 
     sem_permissao = HTTPException(

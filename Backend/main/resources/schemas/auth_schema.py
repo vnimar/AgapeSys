@@ -14,6 +14,23 @@ PerfilType = Literal[
     "administrador",
 ]
 
+# Do mais alto para o mais baixo. Quem soma vários perfis (perfil manual + pastas)
+# tem como "perfil principal" o primeiro desta lista que tiver.
+ORDEM_PERFIS: tuple[PerfilType, ...] = (
+    "administrador",
+    "coordenador_geral",
+    "coordenador_formacao_vivencia",
+    "coordenador_comunidade_cursista",
+    "tutor_comunidade_cursista",
+    "servo",
+)
+
+
+def ordenar_perfis(perfis) -> list:
+    """Remove repetidos e ordena do mais alto para o mais baixo."""
+    unicos = set(perfis)
+    return [p for p in ORDEM_PERFIS if p in unicos]
+
 
 def _validar_senha(senha: str) -> str:
     if len(senha) < 8:
@@ -49,9 +66,14 @@ class UsuarioLogado(BaseModel):
     id: int
     nome: str
     email: str
-    perfil: PerfilType
+    perfil: PerfilType              # principal (o mais alto); versões antigas do app usam só este
+    perfis: list[PerfilType] = []   # todos: o perfil manual + os das pastas do ano
     id_servo: Optional[int] = None
     trocar_senha: bool = False  # senha temporária: o app obriga a trocar
+
+    def tem(self, *perfis: str) -> bool:
+        """Se a pessoa tem pelo menos um destes perfis."""
+        return any(p in (self.perfis or [self.perfil]) for p in perfis)
 
 class TokenResponse(BaseModel):
     access_token: str

@@ -50,7 +50,7 @@ def get_servo_by_id(
     usuario: Optional[UsuarioLogado] = Depends(exigir_login),
 ):
     # Quem não cuida dos servos só vê o próprio cadastro
-    if usuario and usuario.perfil not in PERFIS_COORD_SERVOS and usuario.id_servo != servo_id:
+    if usuario and not usuario.tem(*PERFIS_COORD_SERVOS) and usuario.id_servo != servo_id:
         raise HTTPException(status_code=403, detail="Seu perfil não tem acesso a esta função.")
 
     try:

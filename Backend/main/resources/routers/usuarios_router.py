@@ -23,9 +23,11 @@ router = APIRouter(prefix="/usuarios", tags=["Usuários"], dependencies=[Depends
 SELECT_USUARIO = """
     SELECT u.id_usuario AS id, u.nome, u.email, u.perfil, u.ativo, u.id_servo,
            s.nome AS servo_nome, (s.status = 'Ativo') AS servo_ativo,
-           u.trocar_senha, u.ultimo_login
+           u.trocar_senha, u.ultimo_login,
+           COALESCE(pp.perfis, '{}') AS perfis_pasta
     FROM usuario u
     LEFT JOIN servo s ON s.id_servo = u.id_servo
+    LEFT JOIN vw_perfis_pasta pp ON pp.id_servo = u.id_servo
 """
 
 # Sem letras/números parecidos (0/O, 1/l/I) para ditar ou digitar sem erro

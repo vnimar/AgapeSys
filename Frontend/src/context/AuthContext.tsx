@@ -5,6 +5,7 @@ import {
   Usuario,
   PERFIS_ADMIN,
   PERFIS_COORD_SERVOS,
+  temPerfil,
   buscarLoginObrigatorio,
   login as loginApi,
   buscarUsuarioLogado,
@@ -111,10 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     usuario,
     carregando,
-    isAdmin: !!usuario && PERFIS_ADMIN.includes(usuario.perfil),
+    isAdmin: temPerfil(usuario, PERFIS_ADMIN),
     loginObrigatorio,
     // Sem login (só na transição) continua vendo tudo, como antes
-    cuidaDosServos: usuario ? PERFIS_COORD_SERVOS.includes(usuario.perfil) : !loginObrigatorio,
+    cuidaDosServos: usuario ? temPerfil(usuario, PERFIS_COORD_SERVOS) : !loginObrigatorio,
     entrar,
     sair,
     recarregarUsuario,

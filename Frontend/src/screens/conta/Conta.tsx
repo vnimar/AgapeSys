@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
-import { PERFIL_LABEL, trocarSenha } from "../../services/auth/auth";
+import { PERFIL_LABEL, temPerfil, trocarSenha } from "../../services/auth/auth";
 import { authStyles as styles } from "../login/Login.styles";
 
 function iniciais(nome: string) {
@@ -101,12 +101,17 @@ export default function ContaScreen() {
               <Text style={styles.cardValue}>{usuario.email}</Text>
             </View>
             <View style={[styles.cardRow, styles.cardRowLast]}>
-              <Text style={styles.cardKey}>Perfil</Text>
-              <Text style={styles.cardValue}>{PERFIL_LABEL[usuario.perfil] ?? usuario.perfil}</Text>
+              <Text style={styles.cardKey}>Acesso</Text>
+              <Text style={styles.cardValue}>
+                {(usuario.perfis ?? [usuario.perfil])
+                  .filter((p, _, todos) => p !== "servo" || todos.length === 1)
+                  .map((p) => PERFIL_LABEL[p] ?? p)
+                  .join("\n")}
+              </Text>
             </View>
           </View>
 
-          {usuario.perfil === "administrador" && (
+          {temPerfil(usuario, ["administrador"]) && (
             <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push("/usuarios")}>
               <Text style={styles.btnPrimaryText}>Gerenciar usuários</Text>
             </TouchableOpacity>
