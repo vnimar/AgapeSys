@@ -105,4 +105,38 @@ export const styles = StyleSheet.create({
   time: {
     color: '#888',
   },
+  recentesTopo: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 8,
+},
+recenteItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingVertical: 8,
+},
+recenteData: {
+  width: 44,
+  height: 44,
+  borderRadius: 12,
+  backgroundColor: '#eff6ff',
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginRight: 12,
+},
+recenteDia: {
+  color: '#1e3a8a',
+  fontSize: 19,
+  fontWeight: 'bold',
+},
+recenteMes: {
+  color: '#1e3a8a',
+  fontSize: 11,
+},
+recenteNome: {
+  flex: 1,
+  fontSize: 14,
+  fontWeight: '600',
+},
 });
