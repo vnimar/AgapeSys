@@ -5,15 +5,10 @@ import {useRouter} from 'expo-router';
 
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import {formatarDataBR, styles} from './Home.styles';
-import {getProximaMissao, getUltimasMissoes} from '../../services/missao/missao';
+import {getProximaMissao, getUltimasMissoes, Missao} from '../../services/missao/missao';
 import Header, { headerStyles } from '../../../components/Header';
 import {useAuth} from '../../context/AuthContext';
 
-interface Missao {
-  id_missao: number;
-  data: string;
-  descricao: string;
-}
 const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const MESES_COMPLETOS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -70,22 +65,16 @@ const Home: React.FC = () => {
 
   useEffect(() => {
   async function carregar() {
-    try {
-      const [proxima, ultimas] = await Promise.all([
-        getProximaMissao(),
-        getUltimasMissoes(),
-      ]);
-
-      // @ts-ignore
-      setMissao(proxima);
-      // @ts-ignore
-      setUltimasMissoes(ultimas);
-
-    } catch (error) {
-      console.error("Erro na requisição:", error);
-    } finally {
-      setLoading(false);
-    }
+    // allSettled: sem missão futura o /proxima dá 404, e isso não pode
+    // esconder as últimas missões
+    const [proxima, ultimas] = await Promise.allSettled([
+      getProximaMissao(),
+      getUltimasMissoes(),
+    ]);
+    setMissao(proxima.status === 'fulfilled' ? proxima.value : null);
+    setUltimasMissoes(ultimas.status === 'fulfilled' ? ultimas.value : []);
+    if (ultimas.status === 'rejected') console.error("Erro ao buscar últimas missões:", ultimas.reason);
+    setLoading(false);
   }carregar();
   // Recarrega ao trocar de usuário (entrar/sair), para usar o token certo
   }, [usuario?.id]);
@@ -111,14 +100,14 @@ const Home: React.FC = () => {
               {formatarDataBR(missao.data)}
             </Text>
             <Text style={styles.description}>{missao.descricao}</Text>
+            <View style={styles.cardInfo}>
+              <Text>🕒 {missao.horario.includes(':') ? `Início às ${missao.horario}` : missao.horario}</Text>
+              <Text>📍 {missao.local}</Text>
+            </View>
           </>
         ) : (
           <Text>Nenhuma missão encontrada</Text>
         )}
-        <View style={styles.cardInfo}>
-          <Text>🕒 Início às 19:00</Text>
-          <Text>📍 Paróquia São Miguel Arcanjo</Text>
-        </View>
       </View>
       {/* Grid de Ações */}
       <View style={styles.grid}>

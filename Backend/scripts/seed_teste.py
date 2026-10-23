@@ -83,8 +83,8 @@ def main() -> int:
                 )
                 comunidade[nome] = cur.fetchone()[0]
                 cur.execute(
-                    """INSERT INTO pasta (nome, id_comunidade, perfil, max_anos_seguidos)
-                       VALUES (%s, %s, 'coordenador_comunidade_cursista', 2) RETURNING id_pasta""",
+                    """INSERT INTO pasta (nome, id_comunidade, perfil, repeticao)
+                       VALUES (%s, %s, 'coordenador_comunidade_cursista', 'ciclo') RETURNING id_pasta""",
                     (f"Coordenador de Comunidade de Cursistas: {nome}", comunidade[nome])
                 )
                 pasta_coord[nome] = cur.fetchone()[0]
@@ -95,22 +95,37 @@ def main() -> int:
                 )
                 pasta_tutor[nome] = cur.fetchone()[0]
 
-            # Mesmos nomes e perfis da migration 007 (NULL = servo) e anos seguidos
-            # da 008 (NULL = sem limite)
+            # Mesmos nomes e perfis da migration 007 (NULL = servo); momento e
+            # repetição da 009
             pasta = {}
-            for nome, anos, perfil in [
-                ("Música", None, None),
-                ("Ornamentação", 1, None),
-                ("Coordenador de Comunidade de Servos: Belém", 1, None),
-                ("Coordenador Geral", 2, "coordenador_geral"),
-                ("Coordenador de Formação de Servos", 1, "coordenador_formacao_vivencia"),
-                ("Coordenador de Espiritualidade de Vivência de Servos", 1, "coordenador_formacao_vivencia"),
+            for nome, momento, repeticao, perfil in [
+                ("Música", "ambos", "livre", None),
+                ("Ornamentação", "ambos", "padrao", None),
+                ("Cozinha", "encontro", "padrao", None),
+                ("Intercessão", "encontro", "padrao", None),
+                ("Palestra", "encontro", "padrao", None),
+                ("Coordenador de Comunidade de Servos: Belém", "pos", "padrao", None),
+                ("Coordenador Geral", "ambos", "ciclo", "coordenador_geral"),
+                ("Coordenador de Formação de Servos", "pos", "padrao", "coordenador_formacao_vivencia"),
+                ("Coordenador de Espiritualidade de Vivência de Servos", "pos", "padrao",
+                 "coordenador_formacao_vivencia"),
             ]:
                 cur.execute(
-                    "INSERT INTO pasta (nome, max_anos_seguidos, perfil) VALUES (%s, %s, %s) RETURNING id_pasta",
-                    (nome, anos, perfil)
+                    "INSERT INTO pasta (nome, momento, repeticao, perfil) VALUES (%s, %s, %s, %s) RETURNING id_pasta",
+                    (nome, momento, repeticao, perfil)
                 )
                 pasta[nome] = cur.fetchone()[0]
+
+            # A mesma pasta com outro nome no Pós-Encontro
+            for nome, principal in [("Espiritualidade e Intercessão", "Intercessão"),
+                                    ("Ensino", "Palestra")]:
+                cur.execute(
+                    "INSERT INTO pasta (nome, momento, id_pasta_principal) VALUES (%s, 'pos', %s) RETURNING id_pasta",
+                    (nome, pasta[principal])
+                )
+                pasta[nome] = cur.fetchone()[0]
+            cur.execute("UPDATE pasta SET repeticao_coordenador = 'ciclo' WHERE id_pasta = %s",
+                        (pasta["Intercessão"],))
 
             # ── Servos ────────────────────────────────────────────────────────
             def novo_servo(nome, *pastas, ingresso=ANO - 1, status="Ativo", ano=ANO):

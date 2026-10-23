@@ -24,7 +24,7 @@ def listar_servos():
                       s.status,
                       s.ano_ingresso,
                       COALESCE(
-                              json_agg(p.nome) FILTER(WHERE p.nome IS NOT NULL),
+                              json_agg(DISTINCT p.nome) FILTER(WHERE p.nome IS NOT NULL),
                               '[]'
                       ) AS pastas
                FROM servo s
