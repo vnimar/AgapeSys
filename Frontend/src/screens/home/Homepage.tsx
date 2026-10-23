@@ -87,7 +87,8 @@ const Home: React.FC = () => {
       setLoading(false);
     }
   }carregar();
-  }, []);
+  // Recarrega ao trocar de usuário (entrar/sair), para usar o token certo
+  }, [usuario?.id]);
 
   // @ts-ignore
   // @ts-ignore

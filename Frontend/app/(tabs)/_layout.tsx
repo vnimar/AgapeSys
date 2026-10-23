@@ -1,5 +1,6 @@
- import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import React from 'react';
+import { ActivityIndicator, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -11,6 +12,16 @@ import { useAuth } from '@/src/context/AuthContext';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { usuario, carregando, loginObrigatorio, cuidaDosServos } = useAuth();
+
+  // Ainda lendo o token salvo: não monta as telas, senão elas chamam a API
+  // sem o token, recebem 401 e ficam vazias até sair e entrar de novo
+  if (carregando) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   // Login obrigatório e ninguém logado → tela de login
   if (!carregando && loginObrigatorio && !usuario) {
