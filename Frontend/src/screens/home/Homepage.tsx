@@ -135,9 +135,9 @@ const Home: React.FC = () => {
         )}
         <TouchableOpacity
           style={[styles.button, styles.orange]}
-          onPress={() => console.log("Exportar")}
+          onPress={() => router.push('/conta')}
         >
-          <Text style={styles.buttonText}>Exportar</Text>
+          <Text style={styles.buttonText}>Minha conta</Text>
         </TouchableOpacity>
       </View>
 
