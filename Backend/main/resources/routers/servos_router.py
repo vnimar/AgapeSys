@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/servos", tags=["Servos"])
 
 @router.get("/", response_model=list[ServoListItem], dependencies=[Depends(exigir_coord_servos)])
+# Sem a barra também: o redirect 307 do FastAPI sai como http:// no Render e o app
+# perde o token ao segui-lo (versões antigas do app chamam "/servos")
+@router.get("", response_model=list[ServoListItem], dependencies=[Depends(exigir_coord_servos)], include_in_schema=False)
 def listar_servos():
 
     try:

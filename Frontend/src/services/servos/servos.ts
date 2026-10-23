@@ -3,7 +3,8 @@ import { apiRequest } from "../api";
 
 //Endpoint para buscar informação na Api
 export function getServos() {
-  return apiRequest("/servos");
+  // Com a barra: sem ela o backend redireciona e o token se perde no caminho (401 → logout)
+  return apiRequest("/servos/");
 }
 
 export function getServosById(id_servo: number) {

@@ -102,6 +102,13 @@ def test_coordenacao_ve_cadastro_de_qualquer_servo(client, headers, usuarios, pe
 
 # ── Transição (LOGIN_OBRIGATORIO desligado, como está em produção) ───────────
 
+@pytest.mark.usefixtures("login_obrigatorio")
+def test_lista_de_servos_sem_barra_nao_redireciona(client, headers):
+    # O redirect para "/servos/" perdia o token no app (401 → logout)
+    resposta = client.get("/servos", headers=headers("coordgeral"), follow_redirects=False)
+    assert resposta.status_code == 200, resposta.text
+
+
 @pytest.mark.usefixtures("login_opcional")
 class TestTransicao:
 
