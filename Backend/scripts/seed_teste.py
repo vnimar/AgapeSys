@@ -83,8 +83,8 @@ def main() -> int:
                 )
                 comunidade[nome] = cur.fetchone()[0]
                 cur.execute(
-                    """INSERT INTO pasta (nome, id_comunidade, perfil)
-                       VALUES (%s, %s, 'coordenador_comunidade_cursista') RETURNING id_pasta""",
+                    """INSERT INTO pasta (nome, id_comunidade, perfil, max_anos_seguidos)
+                       VALUES (%s, %s, 'coordenador_comunidade_cursista', 2) RETURNING id_pasta""",
                     (f"Coordenador de Comunidade de Cursistas: {nome}", comunidade[nome])
                 )
                 pasta_coord[nome] = cur.fetchone()[0]
@@ -95,19 +95,20 @@ def main() -> int:
                 )
                 pasta_tutor[nome] = cur.fetchone()[0]
 
-            # Mesmos nomes e perfis da migration 007 (NULL = servo)
+            # Mesmos nomes e perfis da migration 007 (NULL = servo) e anos seguidos
+            # da 008 (NULL = sem limite)
             pasta = {}
-            for nome, repete, perfil in [
-                ("Música", True, None),
-                ("Ornamentação", False, None),
-                ("Coordenador de Comunidade de Servos: Belém", True, None),
-                ("Coordenador Geral", True, "coordenador_geral"),
-                ("Coordenador de Formação de Servos", True, "coordenador_formacao_vivencia"),
-                ("Coordenador de Espiritualidade de Vivência de Servos", True, "coordenador_formacao_vivencia"),
+            for nome, anos, perfil in [
+                ("Música", None, None),
+                ("Ornamentação", 1, None),
+                ("Coordenador de Comunidade de Servos: Belém", 1, None),
+                ("Coordenador Geral", 2, "coordenador_geral"),
+                ("Coordenador de Formação de Servos", 1, "coordenador_formacao_vivencia"),
+                ("Coordenador de Espiritualidade de Vivência de Servos", 1, "coordenador_formacao_vivencia"),
             ]:
                 cur.execute(
-                    "INSERT INTO pasta (nome, pode_repetir, perfil) VALUES (%s, %s, %s) RETURNING id_pasta",
-                    (nome, repete, perfil)
+                    "INSERT INTO pasta (nome, max_anos_seguidos, perfil) VALUES (%s, %s, %s) RETURNING id_pasta",
+                    (nome, anos, perfil)
                 )
                 pasta[nome] = cur.fetchone()[0]
 
