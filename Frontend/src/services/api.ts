@@ -20,11 +20,13 @@ export async function apiRequest<T = unknown>(
   options?: RequestInit
 ): Promise<T> {
   const tokenUsado = authToken;
+  // Envio de arquivo (FormData): o fetch monta o Content-Type com o boundary
+  const ehArquivo = typeof FormData !== "undefined" && options?.body instanceof FormData;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     // headers depois do spread: senão um options.headers apagaria a API key
     headers: {
-      "Content-Type": "application/json",
+      ...(ehArquivo ? {} : { "Content-Type": "application/json" }),
       "X-API-Key": API_KEY,
       ...(tokenUsado ? { Authorization: `Bearer ${tokenUsado}` } : {}),
       ...(options?.headers || {}),

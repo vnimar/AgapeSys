@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
-import { PERFIL_LABEL, temPerfil, trocarSenha } from "../../services/auth/auth";
+import { PERFIL_LABEL, PERFIS_ADMIN, temPerfil, trocarSenha } from "../../services/auth/auth";
 import { authStyles as styles } from "../login/Login.styles";
 
 function iniciais(nome: string) {
@@ -114,6 +114,12 @@ export default function ContaScreen() {
           {temPerfil(usuario, ["administrador"]) && (
             <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push("/usuarios")}>
               <Text style={styles.btnPrimaryText}>Gerenciar usuários</Text>
+            </TouchableOpacity>
+          )}
+
+          {temPerfil(usuario, PERFIS_ADMIN) && (
+            <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push("/importar-pastas")}>
+              <Text style={styles.btnPrimaryText}>Importar pastas</Text>
             </TouchableOpacity>
           )}
 

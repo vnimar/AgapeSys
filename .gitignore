@@ -1,6 +1,6 @@
 
 # Planilhas com dados dos servos: privadas, nunca versionar
-Pastas/
+/Pastas/
 *.xlsx
 *.xls
 *.csv

@@ -24,6 +24,7 @@ export default function RootLayout() {
             <Stack.Screen name="conta" options={{ presentation: 'modal' }} />
             <Stack.Screen name="trocar-senha" options={{ gestureEnabled: false }} />
             <Stack.Screen name="usuarios" />
+            <Stack.Screen name="importar-pastas" />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
