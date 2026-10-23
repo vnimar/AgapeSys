@@ -37,7 +37,9 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [carregando, setCarregando] = useState(true);
-  const [loginObrigatorio, setLoginObrigatorio] = useState(false);
+  // Começa exigindo login: sem isso, enquanto o backend (Render) acorda, o app
+  // instalado agora abriria sem login. O valor salvo ou o do backend corrige depois.
+  const [loginObrigatorio, setLoginObrigatorio] = useState(true);
 
   const sair = useCallback(async () => {
     setAuthToken(null);
